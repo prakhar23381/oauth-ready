@@ -401,6 +401,8 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 - UI kit: shadcn "base-nova" = **Base UI** (not Radix): use `render` prop instead of `asChild`. `cn` comes from the `cn` package (published by shadcn).
 - **Design audit:** `node scripts/shot.mjs <url> <outPrefix> [w] [h]` screenshots both themes and prints font/radius/overflow violations against DESIGN.md (uses playwright-core + cached headless Chromium). Run it on every new page.
 - **Hierarchy rules (DESIGN.md §8a):** answer first, rows collapsed by default, one evidence marker per sentence, explanations in `Tip`/`Hint` (src/components/tip.tsx), no intro paragraphs. The user asked for this twice; apply it to every new page.
+- **Copy register (DESIGN.md §8b):** professional, neutral, noun labels. The agent's synthesis prompt in P3 must require this for generated guide text.
+- **Layout:** pages use the full 1240px container with two-column bands; do not fall back to a narrow single column.
 - Styling building blocks: `label-mono` / `meta-mono` / `shadow-elevated` utilities (globals.css), `Chip` (src/components/chip.tsx), tones in `src/lib/ui-meta.ts`, theme via next-themes (default dark) in `src/components/theme.tsx`. New pages (/, /generate, /verification, /about) must use these.
 - Screenshots (raw): headless Chrome at `~/Library/Caches/ms-playwright/chromium_headless_shell-1254/chrome-headless-shell-mac-arm64/chrome-headless-shell --headless --screenshot=… --window-size=W,H URL`.
 - Library guide writing recipe (D12): fetch official pages with WebFetch asking for VERBATIM quotes; every claim gets status + quote + source; probe discovery/authorize endpoints with curl; record conflicts and stale sources (e.g. Nylas 2019 cost figure vs CASA 2024 pricing).

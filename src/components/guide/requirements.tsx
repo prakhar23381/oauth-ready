@@ -35,8 +35,8 @@ export function RequirementsChecklist({ slug, requirements, paths }: { slug: str
               <span className={checked[r.item] ? "text-muted-foreground line-through" : undefined}>{r.item}</span>
             </label>
             {!forDefault && (
-              <Tip content={`Only needed for: ${r.requiredFor.map(pathName).join(", ").toLowerCase()}.`}>
-                <Chip>Other path</Chip>
+              <Tip content={`Required only for: ${r.requiredFor.map(pathName).join(", ").toLowerCase()}.`}>
+                <Chip>Other paths</Chip>
               </Tip>
             )}
             <Tip

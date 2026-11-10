@@ -148,7 +148,7 @@ components:
 
 ## 5. Layout
 
-- Page container 1240px. **Guide body uses the 720px prose column**, with metric grids allowed to span it. The search/generate form is 520px.
+- Page container 1240px, and pages use it: a guide is a reference page, not long-form prose. Wide screens get a 168px section list plus a fluid main column. The answer card is two columns (answer left, stats right), and short sections sit side by side in a two-column band. The 720px prose width applies only to genuinely long-form text (the About page). The search/generate form is 520px.
 - 4px spacing base. Sections are separated by 48–64px. Cards have 20px padding (16px on mobile).
 - Mobile: 16px gutters, single column, no horizontal scroll, and tabs wrap.
 - Sticky top nav: 56px, `background` at 85% alpha with backdrop blur, hairline bottom border, mono-uppercase nav links.
@@ -201,6 +201,15 @@ A guide holds a lot of facts. The page must not show them all at once.
 6. **Paths are compared at a glance.** Each path is a selectable card showing its name, time and tier.
 7. **Explanations live in tips, not on the page.** Use `Tip` (src/components/tip.tsx) for anything that explains rather than answers: how a number was estimated, what a tier means, a section's purpose, a requirement's detail, the biggest risk, cost, the Composio note. `Tip` opens on hover, tap and Enter, so it works on phones. Use `Hint` only for short icon labels. Section headings take a `tip`, not a visible intro paragraph. Things the reader must act on (step titles, checklist items, unverified items) stay visible.
 8. **Orientation.** Wide screens get a sticky section list; sections are separated by a hairline and 48px.
+
+## 8b. UI copy
+
+Write product copy in a professional, neutral register, the way Composio's docs do.
+
+- Name things with standard terms: Summary, Setup plan, Prerequisites, Considerations, Troubleshooting, Prepared materials, Evidence.
+- Use noun labels for chips and stats: "Fees apply", "Key risk", "Active effort", "Provider review", "Composio-managed app available". Not "Has a cost", "Biggest risk", "Start today".
+- No chatty phrasing, slang or idiom in labels or guide content ("dies weekly", "stuck", "pick", "watch out").
+- State facts directly and keep them short. Guide content written by the agent follows the same rule (enforced in the agent's prompt).
 
 ## 9. Don'ts (quick reference)
 

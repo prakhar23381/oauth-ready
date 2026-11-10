@@ -42,7 +42,7 @@ export function ShareBar({ slug, appName, canRegenerate }: { slug: string; appNa
       </button>
       </Hint>
       {canRegenerate && (
-        <Hint label="Research this app again">
+        <Hint label="Regenerate this guide">
           <a className={ghost} aria-label="Regenerate" href={`/generate?q=${encodeURIComponent(appName)}&force=1`}>
             <RefreshCw />
           </a>

@@ -55,13 +55,13 @@ export function ClaimDetail({ claim }: { claim: Claim }) {
       <p className="text-sm">{claim.text}</p>
       {claim.verifiedQuote === false && (
         <p className="flex gap-1.5 text-destructive">
-          <TriangleAlert className="mt-0.5 size-3.5 shrink-0" /> The quote wasn't found in the fetched page, so treat this as unverified.
+          <TriangleAlert className="mt-0.5 size-3.5 shrink-0" /> The quoted text was not found on the source page. Treat this claim as unverified.
         </p>
       )}
       {claim.conflict && (
         <p className="flex gap-1.5 border-l-2 border-warning pl-2 text-muted-foreground">
           <span>
-            <span className="text-warning">Sources disagree.</span> {claim.conflict}
+            <span className="text-warning">Sources conflict.</span> {claim.conflict}
           </span>
         </p>
       )}

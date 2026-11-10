@@ -79,56 +79,70 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
   const nuances = [...g.nuances].sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity] || Number(b.forAgents) - Number(a.forAgents));
 
   const toc = [
-    { id: "answer", label: "The short answer" },
-    { id: "plan", label: "Your plan" },
-    ...(g.requirements.length ? [{ id: "requirements", label: "What to have ready" }] : []),
-    ...(nuances.length ? [{ id: "watch", label: "Watch out for" }] : []),
-    ...(g.blockers.length ? [{ id: "stuck", label: "If you get stuck" }] : []),
-    ...(g.handoffKit.length ? [{ id: "handoff", label: "Prepared for you" }] : []),
+    { id: "answer", label: "Summary" },
+    { id: "plan", label: "Setup plan" },
+    ...(g.requirements.length ? [{ id: "requirements", label: "Prerequisites" }] : []),
+    ...(nuances.length ? [{ id: "watch", label: "Considerations" }] : []),
+    ...(g.blockers.length ? [{ id: "stuck", label: "Troubleshooting" }] : []),
+    ...(g.handoffKit.length ? [{ id: "handoff", label: "Prepared materials" }] : []),
     { id: "evidence", label: "Evidence" },
   ];
 
   return (
     <ClaimsProvider claims={g.claims}>
-      <div className="mx-auto grid max-w-[1000px] gap-x-12 px-4 py-10 sm:px-6 lg:grid-cols-[180px_minmax(0,720px)]">
+      <div className="mx-auto grid max-w-[1240px] gap-x-12 px-4 py-10 sm:px-6 lg:grid-cols-[168px_minmax(0,1fr)]">
         <Toc items={toc} />
         <article className="min-w-0 space-y-12">
           <header id="answer" className="scroll-mt-24 space-y-6">
-            <div className="flex items-center gap-3">
-              {g.logoUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={g.logoUrl} alt="" className="size-9 border bg-white p-1.5" />
-              )}
-              <div className="min-w-0">
-                <h1 className="text-xl leading-tight">{g.appName}</h1>
-                <p className="text-sm text-muted-foreground">OAuth app setup and approval</p>
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+              <div className="flex items-center gap-3">
+                {g.logoUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={g.logoUrl} alt="" className="size-9 border bg-white p-1.5" />
+                )}
+                <div className="min-w-0">
+                  <h1 className="text-xl leading-tight">{g.appName}</h1>
+                  <p className="text-sm text-muted-foreground">OAuth app setup and approval guide</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <Tip
+                  content={`Researched ${g.generatedAt} from ${g.sources.length} sources and ${g.claims.length} graded claims. ${g.generator.kind === "live" ? "Generated live by the agent" : "Library guide"}: ${g.generator.by}.`}
+                >
+                  <span className="meta-mono text-subtle-foreground">
+                    {g.generatedAt} · {g.sources.length} sources{handsOn ? ` · ${handsOn} verified hands-on` : ""}
+                  </span>
+                </Tip>
+                <ShareBar slug={g.slug} appName={g.appName} canRegenerate={g.generator.kind === "live"} />
               </div>
             </div>
 
             {/* The answer: one number, one sentence, three supporting numbers. Everything else is a tip. */}
             <section className="border bg-card p-5 shadow-elevated sm:p-7">
+              <div className="grid items-end gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+                <div>
               <p className="text-[44px] leading-[1.05] tracking-[-0.025em] tabular-nums sm:text-[56px]">{formatRange(p.timeToProduction)}</p>
               <p className="mt-1 text-muted-foreground">
-                until real users can connect
-                <Tip label="About this number" content={<>For the most common path: {p.name.toLowerCase()}. <span className="text-muted-foreground">{p.timeToProduction.basis}</span></>} />
+                Estimated time to production
+                <Tip label="About this estimate" content={<>Time until any end user can connect, for the most common path: {p.name.toLowerCase()}. <span className="text-muted-foreground">{p.timeToProduction.basis}</span></>} />
               </p>
               <p className="mt-5 text-[17px] leading-snug">
                 {g.verdict.headline}
                 <ClaimRefs ids={g.verdict.claimIds} />
               </p>
-              <div className="mt-5">
-                <StatRow path={p} />
+                </div>
+                <StatRow path={p} vertical />
               </div>
               <div className="mt-5 flex flex-wrap items-center gap-2">
                 <TierChip tier={p.tier} />
                 <Tip content={g.verdict.biggestRisk}>
                   <Chip tone="warning">
-                    <TriangleAlert className="size-3" /> Biggest risk
+                    <TriangleAlert className="size-3" /> Key risk
                   </Chip>
                 </Tip>
                 {p.cost && !/^none/i.test(p.cost) && (
                   <Tip content={p.cost}>
-                    <Chip>Has a cost</Chip>
+                    <Chip>Fees apply</Chip>
                   </Tip>
                 )}
                 {g.composio.status === "managed" && (
@@ -138,52 +152,43 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
                         <p>{g.composio.note}</p>
                         {g.composio.setupGuideUrl && (
                           <a href={g.composio.setupGuideUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-0.5 text-brand-ink hover:underline">
-                            Composio's setup walkthrough <ArrowUpRight className="size-3.5" />
+                            Composio setup guide <ArrowUpRight className="size-3.5" />
                           </a>
                         )}
                       </>
                     }
                   >
                     <Chip tone="success">
-                      <CircleCheck className="size-3" /> Start today on Composio
+                      <CircleCheck className="size-3" /> Composio-managed app available
                     </Chip>
                   </Tip>
                 )}
                 {g.composio.status !== "managed" && (
                   <Tip content={g.composio.note}>
-                    <Chip>{g.composio.status === "bring_your_own" ? "Needs your own app" : "Not on Composio yet"}</Chip>
+                    <Chip>{g.composio.status === "bring_your_own" ? "Own OAuth app required" : "Not in Composio directory"}</Chip>
                   </Tip>
                 )}
               </div>
             </section>
 
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <ShareBar slug={g.slug} appName={g.appName} canRegenerate={g.generator.kind === "live"} />
-              <Tip
-                content={`Researched ${g.generatedAt} from ${g.sources.length} sources and ${g.claims.length} graded claims. ${g.generator.kind === "live" ? "Generated live by the agent" : "Library guide"}: ${g.generator.by}.`}
-              >
-                <span className="meta-mono text-subtle-foreground">
-                  {g.generatedAt} · {g.sources.length} sources{handsOn ? ` · ${handsOn} tested` : ""}
-                </span>
-              </Tip>
-            </div>
           </header>
 
-          <Section id="plan" title="Your plan" tip={g.paths.length > 1 ? "How hard this is depends on what you ask for. Pick the path that matches your product, then open a step for its details." : "Open a step for its details."}>
+          <Section id="plan" title="Setup plan" tip={g.paths.length > 1 ? "Effort depends on the scopes requested and the intended audience. Select the path that matches your product, then expand a step for details." : "Expand a step for details."}>
             <PathTabs paths={g.paths} />
           </Section>
 
+          <div className="grid gap-x-12 gap-y-12 lg:grid-cols-2">
           {g.requirements.length > 0 && (
-            <Section id="requirements" title="What to have ready" tip="Tick things off as you go. Your ticks are saved in this browser only.">
+            <Section id="requirements" title="Prerequisites" tip="Progress is saved in this browser only.">
               <RequirementsChecklist slug={g.slug} requirements={g.requirements} paths={g.paths} />
             </Section>
           )}
 
           {nuances.length > 0 && (
-            <Section id="watch" title="Watch out for">
+            <Section id="watch" title="Considerations" tip="Limits and policies that affect setup or ongoing operation, most severe first.">
               <div className="divide-y border-y">
                 {nuances.map((n) => (
-                  <Disclosure key={n.title} icon={SEVERITY_ICON[n.severity]} title={n.title} aside={n.forAgents ? <Tip content="Matters more for long-running agents than for ordinary apps."><Chip>AI agents</Chip></Tip> : undefined}>
+                  <Disclosure key={n.title} icon={SEVERITY_ICON[n.severity]} title={n.title} aside={n.forAgents ? <Tip content="Particularly relevant to long-running AI agents."><Chip>AI agents</Chip></Tip> : undefined}>
                     <p className="pl-7 text-sm text-muted-foreground">
                       {n.detail}
                       <ClaimRefs ids={n.claimIds} />
@@ -195,7 +200,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           )}
 
           {g.blockers.length > 0 && (
-            <Section id="stuck" title="If you get stuck">
+            <Section id="stuck" title="Troubleshooting">
               <div className="divide-y border-y">
                 {g.blockers.map((b) => (
                   <Disclosure key={b.symptom} title={b.symptom}>
@@ -205,7 +210,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
                         {b.fix}
                         <ClaimRefs ids={b.claimIds} />
                       </p>
-                      {b.escalation && <p className="text-muted-foreground">Escalate through: {b.escalation}</p>}
+                      {b.escalation && <p className="text-muted-foreground">Escalation: {b.escalation}</p>}
                     </div>
                   </Disclosure>
                 ))}
@@ -214,7 +219,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           )}
 
           {g.handoffKit.length > 0 && (
-            <Section id="handoff" title="Prepared for you" tip="Drafts the agent wrote so you don't start from a blank form. Review them before you paste.">
+            <Section id="handoff" title="Prepared materials" tip="Drafts prepared by the agent for the provider's console and review forms. Review before submitting.">
               <div className="divide-y border-y">
                 {g.handoffKit.map((h) => (
                   <Disclosure key={h.title} title={h.title}>
@@ -228,7 +233,9 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
             </Section>
           )}
 
-          <Section id="evidence" title="Evidence" tip="Every claim is graded by where it came from. Each marker in the guide opens the quote and source behind that sentence.">
+          </div>
+
+          <Section id="evidence" title="Evidence" tip="Each claim is graded by its source. Markers throughout the guide open the supporting quote and reference.">
             <div className="flex flex-wrap gap-x-5 gap-y-2">
               {(Object.keys(STATUS_META) as (keyof typeof STATUS_META)[])
                 .filter((s) => counts.get(s))
@@ -242,7 +249,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
 
             {g.unknowns.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-[17px]">What we couldn't verify</h3>
+                <h3 className="text-[17px]">Unverified items</h3>
                 <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
                   {g.unknowns.map((u) => (
                     <li key={u} className="flex gap-2.5">
@@ -256,7 +263,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
 
             <div className="mt-6 divide-y border-y">
               {overlay && (
-                <Disclosure title="What we tried by hand" aside={<span className="meta-mono text-subtle-foreground">{overlay.attempts.length}</span>}>
+                <Disclosure title="Hands-on verification" aside={<span className="meta-mono text-subtle-foreground">{overlay.attempts.length}</span>}>
                   <ul className="space-y-2 text-sm">
                     {overlay.attempts.map((a) => (
                       <li key={a.date + a.what}>
@@ -265,11 +272,11 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
                       </li>
                     ))}
                   </ul>
-                  <a href="/verification" className="mt-2 inline-block text-sm text-brand-ink hover:underline">See the full verification log</a>
+                  <a href="/verification" className="mt-2 inline-block text-sm text-brand-ink hover:underline">View the full verification log</a>
                 </Disclosure>
               )}
               {g.probes.length > 0 && (
-                <Disclosure title="Live checks the agent ran" aside={<span className="meta-mono text-subtle-foreground">{g.probes.length}</span>}>
+                <Disclosure title="Automated endpoint checks" aside={<span className="meta-mono text-subtle-foreground">{g.probes.length}</span>}>
                   <ul className="space-y-3 text-sm">
                     {g.probes.map((pr) => (
                       <li key={pr.check} className="flex gap-2.5">
@@ -283,7 +290,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
                   </ul>
                 </Disclosure>
               )}
-              <Disclosure title="Every claim, strongest evidence first" aside={<span className="meta-mono text-subtle-foreground">{g.claims.length}</span>}>
+              <Disclosure title="All claims" aside={<span className="meta-mono text-subtle-foreground">{g.claims.length}</span>}>
                 <ul className="divide-y">
                   {[...g.claims]
                     .sort((a, b) => STATUS_META[a.status].rank - STATUS_META[b.status].rank)

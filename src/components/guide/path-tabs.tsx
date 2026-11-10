@@ -35,19 +35,33 @@ function TierChipStatic({ tier }: { tier: 1 | 2 | 3 | 4 }) {
 }
 
 /** Three small numbers. How each was estimated is in its tip, never inline. */
-export function StatRow({ path }: { path: Path }) {
+export function StatRow({ path, vertical = false }: { path: Path; vertical?: boolean }) {
   const cells = [
-    { label: "First test login", r: path.timeToFirstLogin, value: formatRange(path.timeToFirstLogin) },
-    { label: "Your active work", r: path.activeEffort, value: formatRange(path.activeEffort) },
-    { label: "Waiting on the provider", r: path.waitTime, value: path.waitTime.max === 0 ? "None" : formatRange(path.waitTime) },
+    { label: "First test connection", r: path.timeToFirstLogin, value: formatRange(path.timeToFirstLogin) },
+    { label: "Active effort", r: path.activeEffort, value: formatRange(path.activeEffort) },
+    { label: "Provider review", r: path.waitTime, value: path.waitTime.max === 0 ? "None" : formatRange(path.waitTime) },
   ];
+  if (vertical)
+    return (
+      <dl className="divide-y border-y">
+        {cells.map((c) => (
+          <div key={c.label} className="flex items-baseline justify-between gap-4 py-3">
+            <dt className="text-sm text-muted-foreground">
+              {c.label}
+              <Tip label={`Basis for ${c.label.toLowerCase()}`} content={<><span className="text-muted-foreground">Basis for this estimate.</span> {c.r.basis}</>} />
+            </dt>
+            <dd className="text-[17px] tabular-nums">{c.value}</dd>
+          </div>
+        ))}
+      </dl>
+    );
   return (
     <dl className="grid grid-cols-3 divide-x border-y">
       {cells.map((c) => (
         <div key={c.label} className="px-3 py-3 first:pl-0 sm:px-4">
           <dt className="text-xs text-muted-foreground">
             {c.label}
-            <Tip label={`How we estimated ${c.label.toLowerCase()}`} content={<><span className="text-muted-foreground">How we estimated this.</span> {c.r.basis}</>} />
+            <Tip label={`Basis for ${c.label.toLowerCase()}`} content={<><span className="text-muted-foreground">Basis for this estimate.</span> {c.r.basis}</>} />
           </dt>
           <dd className="mt-0.5 text-[17px] tabular-nums">{c.value}</dd>
         </div>
@@ -107,9 +121,9 @@ function StepRow({ step, index, open, onToggle }: { step: Step; index: number; o
 }
 
 const OWNER_SUMMARY: Record<Owner, (n: number) => string> = {
-  you: (n) => `${n} ${n === 1 ? "step" : "steps"} only you can do`,
-  agent: (n) => `${n} ${n === 1 ? "step" : "steps"} the agent can prepare for you`,
-  provider: (n) => `${n} ${n === 1 ? "step is" : "steps are"} waiting on the provider`,
+  you: (n) => `${n} ${n === 1 ? "step requires" : "steps require"} your action`,
+  agent: (n) => `${n} ${n === 1 ? "step" : "steps"} can be prepared by the agent`,
+  provider: (n) => `${n} ${n === 1 ? "step is a" : "steps are"} provider review ${n === 1 ? "period" : "periods"}`,
 };
 
 function PathBody({ path }: { path: Path }) {
@@ -134,10 +148,10 @@ function PathBody({ path }: { path: Path }) {
           })}
           {path.cost && !/^none/i.test(path.cost) && (
             <Tip content={path.cost}>
-              <Chip>Has a cost</Chip>
+              <Chip>Fees apply</Chip>
             </Tip>
           )}
-          <Tip content={<>{path.whenThisApplies}</>} label="When this path applies" />
+          <Tip content={<>{path.whenThisApplies}</>} label="Applicability of this path" />
           <button type="button" onClick={() => setOpen(allOpen ? new Set() : new Set(path.steps.map((s) => s.id)))} className="ml-auto cursor-pointer text-[13px] text-brand-ink hover:underline">
             {allOpen ? "Collapse all" : "Expand all"}
           </button>
