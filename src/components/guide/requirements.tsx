@@ -24,28 +24,24 @@ export function RequirementsChecklist({ slug, requirements, paths }: { slug: str
   const done = requirements.filter((r) => checked[r.item]).length;
   return (
     <div>
-      <p className="mb-2 text-xs text-muted-foreground">
-        {done}/{requirements.length} ready. Your checkmarks are saved in this browser only.
-      </p>
-      <ul className="divide-y rounded-lg border">
+      <ul className="divide-y border-y">
         {requirements.map((r) => (
-          <li key={r.item} className="flex items-start gap-3 p-3">
-            <Checkbox checked={!!checked[r.item]} onCheckedChange={(v) => toggle(r.item, !!v)} className="mt-0.5" aria-label={r.item} />
+          <li key={r.item} className="flex items-start gap-3 py-3.5">
+            <Checkbox checked={!!checked[r.item]} onCheckedChange={(v) => toggle(r.item, !!v)} className="mt-1" aria-label={r.item} />
             <div className="min-w-0">
-              <div className="text-sm font-medium">
+              <div>
                 {r.item}
                 <ClaimRefs ids={r.claimIds} />
               </div>
               <div className="text-sm text-muted-foreground">{r.detail}</div>
-              <div className="mt-1 flex flex-wrap gap-1">
-                {r.requiredFor.map((id) => (
-                  <span key={id} className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{pathName(id)}</span>
-                ))}
-              </div>
+              <div className="meta-mono mt-1 text-subtle-foreground">Needed for: {r.requiredFor.map(pathName).join(" · ")}</div>
             </div>
           </li>
         ))}
       </ul>
+      <p className="meta-mono mt-2 text-subtle-foreground">
+        {done}/{requirements.length} ready · saved in this browser only
+      </p>
     </div>
   );
 }

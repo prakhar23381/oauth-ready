@@ -1,27 +1,43 @@
 import type { ClaimStatus, Owner } from "@/lib/schema/guide";
 
-export const TIER_META: Record<1 | 2 | 3 | 4, { label: string; blurb: string; className: string; dot: string }> = {
-  1: { label: "Self-serve", blurb: "No provider review on this path", className: "bg-emerald-50 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-950 dark:text-emerald-300", dot: "bg-emerald-500" },
-  2: { label: "Light review", blurb: "A provider check or listing, usually days", className: "bg-sky-50 text-sky-800 ring-sky-600/20 dark:bg-sky-950 dark:text-sky-300", dot: "bg-sky-500" },
-  3: { label: "Formal review", blurb: "Required review or security assessment, usually weeks", className: "bg-amber-50 text-amber-900 ring-amber-600/25 dark:bg-amber-950 dark:text-amber-300", dot: "bg-amber-500" },
-  4: { label: "Gated", blurb: "Business status, partnership, MAU or paid tier required", className: "bg-rose-50 text-rose-800 ring-rose-600/20 dark:bg-rose-950 dark:text-rose-300", dot: "bg-rose-500" },
+/** Semantic tones only where they carry literal meaning (DESIGN.md §3). */
+export type Tone = "neutral" | "success" | "warning" | "destructive";
+
+export const TIER_META: Record<1 | 2 | 3 | 4, { label: string; blurb: string; tone: Tone }> = {
+  1: { label: "Self-serve", blurb: "No provider review on this path", tone: "success" },
+  2: { label: "Light review", blurb: "A provider check or listing, usually days", tone: "neutral" },
+  3: { label: "Formal review", blurb: "Required review or security assessment, usually weeks", tone: "warning" },
+  4: { label: "Gated", blurb: "Business status, partnership, MAU or paid tier required", tone: "destructive" },
 };
 
-export const OWNER_META: Record<Owner, { label: string; short: string; emoji: string; className: string }> = {
-  agent: { label: "Agent can do / prepare", short: "Agent", emoji: "🤖", className: "bg-violet-50 text-violet-800 ring-violet-600/20 dark:bg-violet-950 dark:text-violet-300" },
-  you: { label: "You must do", short: "You", emoji: "👤", className: "bg-slate-100 text-slate-800 ring-slate-500/20 dark:bg-slate-800 dark:text-slate-200" },
-  provider: { label: "Waiting on provider", short: "Wait", emoji: "⏳", className: "bg-amber-50 text-amber-900 ring-amber-600/25 dark:bg-amber-950 dark:text-amber-300" },
+export const OWNER_META: Record<Owner, { label: string; short: string; emoji: string }> = {
+  agent: { label: "The agent can do or prepare this", short: "Agent", emoji: "🤖" },
+  you: { label: "You must do this", short: "You", emoji: "👤" },
+  provider: { label: "Waiting on the provider", short: "Wait", emoji: "⏳" },
 };
 
-export const STATUS_META: Record<ClaimStatus, { label: string; description: string; className: string; rank: number }> = {
-  hands_on: { label: "Hands-on verified", description: "We tried this ourselves", className: "bg-emerald-600 text-white", rank: 0 },
-  official_doc: { label: "Official docs", description: "Provider documentation, with quote", className: "bg-sky-600 text-white", rank: 1 },
-  probe: { label: "Live probe", description: "Automated HTTP check by the agent", className: "bg-indigo-600 text-white", rank: 2 },
-  community: { label: "Community report", description: "Forums, vendor blogs, anecdotes", className: "bg-amber-500 text-white", rank: 3 },
-  inferred: { label: "Inferred", description: "Reasoned from other facts; no direct source", className: "bg-slate-500 text-white", rank: 4 },
-  unknown: { label: "Unknown", description: "Looked, couldn't find out", className: "bg-slate-300 text-slate-800", rank: 5 },
+export const STATUS_META: Record<ClaimStatus, { label: string; chip: string; description: string; tone: Tone; rank: number }> = {
+  hands_on: { label: "Hands-on verified", chip: "Tested", description: "We tried this ourselves", tone: "success", rank: 0 },
+  official_doc: { label: "Official docs", chip: "Doc", description: "Provider documentation, with a quote", tone: "neutral", rank: 1 },
+  probe: { label: "Live probe", chip: "Probe", description: "Automated HTTP check by the agent", tone: "neutral", rank: 2 },
+  community: { label: "Community report", chip: "Community", description: "Forums, vendor blogs, anecdotes", tone: "warning", rank: 3 },
+  inferred: { label: "Inferred", chip: "Inferred", description: "Reasoned from other facts, no direct source", tone: "neutral", rank: 4 },
+  unknown: { label: "Unknown", chip: "Unknown", description: "We looked and couldn't find out", tone: "neutral", rank: 5 },
 };
 
 export const PHASE_LABEL: Record<string, string> = {
   account: "Account", create: "Create app", configure: "Configure", test: "Test", review: "Review", wait: "Wait", launch: "Launch",
+};
+
+export const TONE_CLASS: Record<Tone, string> = {
+  neutral: "border-border text-muted-foreground",
+  success: "border-success/50 text-success",
+  warning: "border-warning/50 text-warning",
+  destructive: "border-destructive/50 text-destructive",
+};
+export const TONE_DOT: Record<Tone, string> = {
+  neutral: "bg-muted-foreground",
+  success: "bg-success",
+  warning: "bg-warning",
+  destructive: "bg-destructive",
 };

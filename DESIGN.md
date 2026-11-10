@@ -179,7 +179,7 @@ components:
 | Element | Treatment |
 |---|---|
 | Wordmark | "OAuth Ready" in Geist 500 16px, plus a 20px square `foreground` mark with "OR" in mono. **No Composio logo.** |
-| Verdict card | `card` + **shadow-elevated** (the one per view). The headline uses the `h1` token at 400. Stats use the `stat` token with `label` captions. The biggest-risk line is plain text with a `warning`-colored icon, not a filled yellow box. |
+| Verdict card | `card` + **shadow-elevated** (the one per view). The headline is set at 24–26px/400, one step below the page `h1`. Tier chip goes below it, never above. Stats use the `stat` token with `label` captions. The biggest-risk line is plain text with a `warning`-colored icon, not a filled yellow box. |
 | Tier badge | Mono label chip: `TIER 3 · FORMAL REVIEW`. Border and text are semantic: T1 success, T2 neutral, T3 warning, T4 destructive. |
 | Owner chips | Mono label chips `AGENT`, `YOU`, `WAIT`, achromatic, with a Lucide icon (Bot / User / Hourglass). No emoji in product chrome. |
 | Evidence chips | Mono superscript chips: `DOC`, `TESTED`, `PROBE`, `COMMUNITY`, `INFERRED`. `TESTED` is success. `COMMUNITY` and conflicts are warning. A quote not found in its source is destructive. All others are neutral. |

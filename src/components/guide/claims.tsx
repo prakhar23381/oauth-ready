@@ -1,9 +1,11 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import { TriangleAlert } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Chip } from "@/components/chip";
 import type { Claim } from "@/lib/schema/guide";
-import { STATUS_META } from "@/lib/ui-meta";
+import { STATUS_META, TONE_CLASS, type Tone } from "@/lib/ui-meta";
 import { cn } from "@/lib/utils";
 
 const ClaimsCtx = createContext<Map<string, Claim>>(new Map());
@@ -12,35 +14,46 @@ export function ClaimsProvider({ claims, children }: { claims: Claim[]; children
   return <ClaimsCtx.Provider value={new Map(claims.map((c) => [c.id, c]))}>{children}</ClaimsCtx.Provider>;
 }
 
-export function StatusPill({ status, className }: { status: Claim["status"]; className?: string }) {
+/** Tone for a claim: a failed quote check or a source conflict outranks the status tone. */
+function claimTone(c: Claim): Tone {
+  if (c.verifiedQuote === false) return "destructive";
+  if (c.conflict) return "warning";
+  return STATUS_META[c.status].tone;
+}
+
+export function StatusChip({ status }: { status: Claim["status"] }) {
   const m = STATUS_META[status];
-  return (
-    <span className={cn("inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide", m.className, className)} title={m.description}>
-      {m.label}
-    </span>
-  );
+  return <Chip tone={m.tone} title={m.description}>{m.label}</Chip>;
 }
 
 export function ClaimDetail({ claim }: { claim: Claim }) {
   return (
-    <div className="space-y-2 text-sm">
-      <div className="flex flex-wrap items-center gap-1.5">
-        <StatusPill status={claim.status} />
-        <span className="text-xs text-muted-foreground">confidence: {claim.confidence}</span>
-        {claim.asOf && <span className="text-xs text-muted-foreground">· as of {claim.asOf}</span>}
-        {claim.verifiedQuote === false && <span className="text-xs font-medium text-rose-600">· quote not found in source</span>}
+    <div className="space-y-2 text-[13px] leading-normal">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <StatusChip status={claim.status} />
+        <span className="meta-mono text-subtle-foreground">
+          confidence {claim.confidence}
+          {claim.asOf ? ` · as of ${claim.asOf}` : ""}
+        </span>
       </div>
-      <p className="leading-snug">{claim.text}</p>
+      <p className="text-sm">{claim.text}</p>
+      {claim.verifiedQuote === false && (
+        <p className="flex gap-1.5 text-destructive">
+          <TriangleAlert className="mt-0.5 size-3.5 shrink-0" /> The quote wasn't found in the fetched page, so treat this as unverified.
+        </p>
+      )}
       {claim.conflict && (
-        <p className="rounded-md bg-amber-50 p-2 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-          <strong>Sources disagree:</strong> {claim.conflict}
+        <p className="flex gap-1.5 border-l-2 border-warning pl-2 text-muted-foreground">
+          <span>
+            <span className="text-warning">Sources disagree.</span> {claim.conflict}
+          </span>
         </p>
       )}
       {claim.sources.map((s, i) => (
-        <div key={i} className="border-l-2 border-border pl-2 text-xs">
-          {s.quote && <p className="mb-1 italic text-foreground/80">“{s.quote}”</p>}
-          <a href={s.url} target="_blank" rel="noreferrer" className="break-all text-sky-700 underline-offset-2 hover:underline dark:text-sky-400">
-            {s.title ?? s.url}
+        <div key={i} className="border-l-2 border-border pl-2">
+          {s.quote && <p className="mb-1 text-muted-foreground">“{s.quote}”</p>}
+          <a href={s.url} target="_blank" rel="noreferrer" className="meta-mono break-all text-brand-ink hover:underline">
+            {s.title ?? s.url.replace(/^https?:\/\//, "")}
           </a>
         </div>
       ))}
@@ -48,31 +61,26 @@ export function ClaimDetail({ claim }: { claim: Claim }) {
   );
 }
 
-/** Small evidence chips after a sentence; each opens the claim with its quote + source. */
+/** Evidence chips after a sentence. Each opens the claim with its quote and source. */
 export function ClaimRefs({ ids, className }: { ids?: string[]; className?: string }) {
   const claims = useContext(ClaimsCtx);
   const list = (ids ?? []).map((id) => claims.get(id)).filter((c): c is Claim => !!c);
   if (!list.length) return null;
   return (
-    <span className={cn("ml-1 inline-flex flex-wrap gap-0.5 align-middle", className)}>
+    <span className={cn("ml-1.5 inline-flex flex-wrap gap-1 align-[1px]", className)}>
       {list.map((c) => (
         <Popover key={c.id}>
           <PopoverTrigger
-            className={cn(
-              "inline-flex h-4 min-w-4 cursor-pointer items-center justify-center rounded px-1 text-[10px] font-bold leading-none ring-1 ring-inset transition hover:opacity-80",
-              c.status === "official_doc" && "bg-sky-50 text-sky-700 ring-sky-600/30 dark:bg-sky-950 dark:text-sky-300",
-              c.status === "hands_on" && "bg-emerald-50 text-emerald-700 ring-emerald-600/30 dark:bg-emerald-950 dark:text-emerald-300",
-              c.status === "probe" && "bg-indigo-50 text-indigo-700 ring-indigo-600/30",
-              c.status === "community" && "bg-amber-50 text-amber-800 ring-amber-600/30 dark:bg-amber-950 dark:text-amber-300",
-              (c.status === "inferred" || c.status === "unknown") && "bg-slate-50 text-slate-600 ring-slate-500/30",
-              c.conflict && "ring-2 ring-amber-500",
-            )}
             aria-label={`Evidence: ${STATUS_META[c.status].label}`}
+            className={cn(
+              "label-mono inline-flex h-4 cursor-pointer items-center gap-0.5 border px-1 text-[9.5px] hover:bg-accent data-popup-open:bg-accent",
+              TONE_CLASS[claimTone(c)],
+            )}
           >
-            {c.status === "official_doc" ? "doc" : c.status === "hands_on" ? "✓" : c.status === "community" ? "com" : c.status === "probe" ? "probe" : "?"}
-            {c.conflict ? "!" : ""}
+            {STATUS_META[c.status].chip}
+            {(c.conflict || c.verifiedQuote === false) && <TriangleAlert className="size-2.5" />}
           </PopoverTrigger>
-          <PopoverContent className="w-96 max-w-[calc(100vw-2rem)]">
+          <PopoverContent className="w-96 max-w-[calc(100vw-2rem)] p-3 shadow-elevated ring-border">
             <ClaimDetail claim={c} />
           </PopoverContent>
         </Popover>

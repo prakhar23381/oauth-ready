@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { Check, FileText, Link2, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+const base = "inline-flex h-9 items-center gap-2 px-3.5 text-sm font-medium [&_svg]:size-4";
+const primary = `${base} bg-primary text-primary-foreground hover:bg-primary/85`;
+const secondary = `${base} border border-input bg-card hover:bg-accent`;
+const ghost = `${base} text-muted-foreground hover:bg-accent hover:text-foreground`;
 
 export function ShareBar({ slug, appName, canRegenerate }: { slug: string; appName: string; canRegenerate: boolean }) {
   const [copied, setCopied] = useState<"link" | "md" | null>(null);
@@ -12,19 +16,19 @@ export function ShareBar({ slug, appName, canRegenerate }: { slug: string; appNa
   };
   return (
     <div className="flex flex-wrap gap-2 print:hidden">
-      <Button
-        variant="outline"
-        size="sm"
+      <button
+        type="button"
+        className={primary}
         onClick={async () => {
           await navigator.clipboard.writeText(`${location.origin}/guides/${slug}`);
           flash("link");
         }}
       >
         {copied === "link" ? <Check /> : <Link2 />} {copied === "link" ? "Link copied" : "Share link"}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
+      </button>
+      <button
+        type="button"
+        className={secondary}
         onClick={async () => {
           const res = await fetch(`/api/guides/${slug}?format=md`);
           await navigator.clipboard.writeText(await res.text());
@@ -32,11 +36,11 @@ export function ShareBar({ slug, appName, canRegenerate }: { slug: string; appNa
         }}
       >
         {copied === "md" ? <Check /> : <FileText />} {copied === "md" ? "Markdown copied" : "Copy as Markdown"}
-      </Button>
+      </button>
       {canRegenerate && (
-        <Button variant="ghost" size="sm" render={<a href={`/generate?q=${encodeURIComponent(appName)}&force=1`} />}>
+        <a className={ghost} href={`/generate?q=${encodeURIComponent(appName)}&force=1`}>
           <RefreshCw /> Regenerate
-        </Button>
+        </a>
       )}
     </div>
   );

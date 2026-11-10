@@ -1,100 +1,112 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatRange, type Path } from "@/lib/schema/guide";
-import { OWNER_META, PHASE_LABEL, TIER_META } from "@/lib/ui-meta";
+import { Tabs } from "@base-ui/react/tabs";
+import { ArrowUpRight, Bot, Hourglass, TriangleAlert, User } from "lucide-react";
+import { Chip } from "@/components/chip";
+import { formatRange, type Owner, type Path } from "@/lib/schema/guide";
+import { OWNER_META, PHASE_LABEL, TIER_META, TONE_DOT } from "@/lib/ui-meta";
 import { ClaimRefs } from "./claims";
 import { CopyButton } from "./copy-button";
 import { cn } from "@/lib/utils";
-import { ExternalLink } from "lucide-react";
 
-export function TierBadge({ tier, className }: { tier: 1 | 2 | 3 | 4; className?: string }) {
+export function TierChip({ tier }: { tier: 1 | 2 | 3 | 4 }) {
   const m = TIER_META[tier];
   return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset", m.className, className)} title={m.blurb}>
-      <span className={cn("size-1.5 rounded-full", m.dot)} />
+    <Chip tone={m.tone} title={m.blurb}>
       Tier {tier} · {m.label}
-    </span>
+    </Chip>
   );
 }
 
-export function OwnerChip({ owner }: { owner: keyof typeof OWNER_META }) {
-  const m = OWNER_META[owner];
+const OWNER_ICON: Record<Owner, typeof Bot> = { agent: Bot, you: User, provider: Hourglass };
+
+export function OwnerChip({ owner }: { owner: Owner }) {
+  const Icon = OWNER_ICON[owner];
   return (
-    <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset", m.className)} title={m.label}>
-      <span aria-hidden>{m.emoji}</span>
-      {m.short}
-    </span>
+    <Chip title={OWNER_META[owner].label} className={owner === "agent" ? "border-foreground/40 text-foreground" : undefined}>
+      <Icon className="size-3" />
+      {OWNER_META[owner].short}
+    </Chip>
   );
 }
 
-function Metric({ label, value, sub }: { label: string; value: string; sub?: string }) {
+export function StatGrid({ path, compact = false }: { path: Path; compact?: boolean }) {
+  const cells = [
+    { label: "First test login", value: formatRange(path.timeToFirstLogin), basis: path.timeToFirstLogin.basis },
+    { label: "Your active work", value: formatRange(path.activeEffort), basis: path.activeEffort.basis },
+    { label: "Waiting on provider", value: path.waitTime.max === 0 ? "None" : formatRange(path.waitTime), basis: path.waitTime.basis },
+    { label: "Until real users", value: formatRange(path.timeToProduction), basis: path.timeToProduction.basis },
+  ];
   return (
-    <div className="rounded-lg border bg-card p-3">
-      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
-      <div className="mt-0.5 text-base font-semibold tabular-nums">{value}</div>
-      {sub && <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground" title={sub}>{sub}</div>}
-    </div>
+    <dl className="grid grid-cols-2 gap-px border bg-border md:grid-cols-4">
+      {cells.map((c) => (
+        <div key={c.label} className={cn("p-3.5", compact ? "bg-background" : "bg-card")}>
+          <dt className="label-mono text-subtle-foreground">{c.label}</dt>
+          <dd className="mt-1.5 text-xl leading-tight tracking-[-0.01em] tabular-nums">{c.value}</dd>
+          {!compact && <dd className="mt-1.5 line-clamp-3 text-xs leading-snug text-muted-foreground" title={c.basis}>{c.basis}</dd>}
+        </div>
+      ))}
+    </dl>
   );
 }
 
 function PathBody({ path }: { path: Path }) {
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center gap-2">
-        <TierBadge tier={path.tier} />
-        <span className="text-sm text-muted-foreground">{path.whenThisApplies}</span>
-        <ClaimRefs ids={path.claimIds} />
+      <div className="space-y-2">
+        <p className="text-muted-foreground">
+          {path.whenThisApplies}
+          <ClaimRefs ids={path.claimIds} />
+        </p>
+        <TierChip tier={path.tier} />
       </div>
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-        <Metric label="First test login" value={formatRange(path.timeToFirstLogin)} sub={path.timeToFirstLogin.basis} />
-        <Metric label="Your active work" value={formatRange(path.activeEffort)} sub={path.activeEffort.basis} />
-        <Metric label="Waiting on provider" value={path.waitTime.max === 0 ? "None" : formatRange(path.waitTime)} sub={path.waitTime.basis} />
-        <Metric label="Until real users" value={formatRange(path.timeToProduction)} sub={path.cost ? `Cost: ${path.cost}` : path.timeToProduction.basis} />
-      </div>
+      <StatGrid path={path} />
+      {path.cost && (
+        <p className="text-sm">
+          <span className="label-mono mr-2 text-subtle-foreground">Cost</span>
+          {path.cost}
+        </p>
+      )}
 
-      <ol className="relative space-y-3 border-l border-border pl-5">
+      <ol className="divide-y border-y">
         {path.steps.map((s, i) => (
-          <li key={s.id} className="relative">
-            <span className="absolute -left-[29px] top-1 flex size-4 items-center justify-center rounded-full border bg-background text-[10px] font-bold text-muted-foreground">
-              {i + 1}
-            </span>
-            <div className="rounded-lg border bg-card p-3">
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <OwnerChip owner={s.owner} />
-                  <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{PHASE_LABEL[s.phase]}</span>
-                  <h4 className="font-semibold">{s.title}</h4>
-                </div>
-                {s.estTime && <span className="shrink-0 text-xs tabular-nums text-muted-foreground">~{formatRange(s.estTime)}</span>}
+          <li key={s.id} className="grid grid-cols-[2rem_1fr] gap-x-2 py-4">
+            <span className="meta-mono pt-0.5 text-subtle-foreground">{String(i + 1).padStart(2, "0")}</span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <OwnerChip owner={s.owner} />
+                <span className="label-mono text-subtle-foreground">{PHASE_LABEL[s.phase]}</span>
+                {s.estTime && <span className="meta-mono ml-auto text-muted-foreground">~{formatRange(s.estTime)}</span>}
               </div>
-              <p className="mt-1.5 text-sm leading-relaxed text-foreground/90">
+              <h3 className="mt-2 text-[17px] leading-snug">{s.title}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
                 {s.detail}
                 <ClaimRefs ids={s.claimIds} />
               </p>
-              {s.copyValues.length > 0 && (
-                <div className="mt-2 space-y-1.5">
-                  {s.copyValues.map((cv) => (
-                    <div key={cv.label} className="flex flex-wrap items-center gap-2 rounded-md bg-muted px-2 py-1.5">
-                      <span className="text-xs text-muted-foreground">{cv.label}</span>
-                      <code className="min-w-0 flex-1 break-all font-mono text-xs">{cv.value}</code>
-                      <CopyButton value={cv.value} />
-                    </div>
-                  ))}
+              {s.copyValues.map((cv) => (
+                <div key={cv.label} className="mt-3 border border-code-border bg-code">
+                  <div className="flex items-center justify-between gap-2 border-b border-code-border px-3 py-1.5">
+                    <span className="label-mono text-subtle-foreground">{cv.label}</span>
+                    <CopyButton value={cv.value} />
+                  </div>
+                  <code className="block px-3 py-2 font-mono text-[0.85rem] break-all text-code-foreground">{cv.value}</code>
                 </div>
-              )}
+              ))}
               {s.gotchas.length > 0 && (
-                <ul className="mt-2 space-y-1">
+                <ul className="mt-3 space-y-1.5">
                   {s.gotchas.map((g) => (
-                    <li key={g} className="text-xs text-amber-800 dark:text-amber-300">⚠ {g}</li>
+                    <li key={g} className="flex gap-2 text-[13px] leading-snug">
+                      <TriangleAlert className="mt-0.5 size-3.5 shrink-0 text-warning" />
+                      {g}
+                    </li>
                   ))}
                 </ul>
               )}
               {s.links.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-3">
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
                   {s.links.map((l) => (
-                    <a key={l.url} href={l.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-sky-700 hover:underline dark:text-sky-400">
-                      {l.label} <ExternalLink className="size-3" />
+                    <a key={l.url} href={l.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 text-[13px] text-brand-ink hover:underline">
+                      {l.label} <ArrowUpRight className="size-3.5" />
                     </a>
                   ))}
                 </div>
@@ -111,21 +123,30 @@ export function PathTabs({ paths }: { paths: Path[] }) {
   const def = paths.find((p) => p.isDefault) ?? paths[0];
   if (paths.length === 1) return <PathBody path={def} />;
   return (
-    <Tabs defaultValue={def.id}>
-      <TabsList className="h-auto! w-full flex-wrap justify-start gap-1 bg-muted/60 p-1">
+    <Tabs.Root defaultValue={def.id}>
+      <Tabs.List className="flex flex-col border-b sm:flex-row sm:flex-wrap sm:gap-x-6">
         {paths.map((p) => (
-          <TabsTrigger key={p.id} value={p.id} className="h-auto! flex-none whitespace-normal px-3 py-1.5 text-left">
-            <span className={cn("mr-1.5 inline-block size-2 rounded-full", TIER_META[p.tier].dot)} />
-            {p.name}
-            {p.isDefault && <span className="ml-1.5 text-[10px] uppercase text-muted-foreground">most common</span>}
-          </TabsTrigger>
+          <Tabs.Tab
+            key={p.id}
+            value={p.id}
+            className={cn(
+              "label-mono -mb-px flex cursor-pointer items-center gap-2 border-b-2 border-transparent py-2.5 text-left text-muted-foreground hover:text-foreground",
+              "data-active:border-foreground data-active:text-foreground",
+            )}
+          >
+            <span className={cn("size-1.5 shrink-0 rounded-full", TONE_DOT[TIER_META[p.tier].tone])} />
+            <span>
+              {p.name}
+              {p.isDefault && <span className="text-subtle-foreground"> (most common)</span>}
+            </span>
+          </Tabs.Tab>
         ))}
-      </TabsList>
+      </Tabs.List>
       {paths.map((p) => (
-        <TabsContent key={p.id} value={p.id} className="pt-3">
+        <Tabs.Panel key={p.id} value={p.id} className="pt-5 outline-none">
           <PathBody path={p} />
-        </TabsContent>
+        </Tabs.Panel>
       ))}
-    </Tabs>
+    </Tabs.Root>
   );
 }
