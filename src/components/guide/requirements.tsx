@@ -20,28 +20,28 @@ export function RequirementsChecklist({ slug, requirements, paths }: { slug: str
       localStorage.setItem(storageKey, JSON.stringify(next));
     } catch {}
   };
-  const pathName = (id: string) => (id === "all" ? "All paths" : paths.find((p) => p.id === id)?.name ?? id);
-  const done = requirements.filter((r) => checked[r.item]).length;
+  const def = paths.find((p) => p.isDefault) ?? paths[0];
+  const pathName = (id: string) => paths.find((p) => p.id === id)?.name ?? id;
   return (
-    <div>
-      <ul className="divide-y border-y">
-        {requirements.map((r) => (
-          <li key={r.item} className="flex items-start gap-3 py-3.5">
-            <Checkbox checked={!!checked[r.item]} onCheckedChange={(v) => toggle(r.item, !!v)} className="mt-1" aria-label={r.item} />
-            <div className="min-w-0">
-              <div>
-                {r.item}
+    <ul className="divide-y border-y">
+      {requirements.map((r) => {
+        const forDefault = r.requiredFor.includes("all") || r.requiredFor.includes(def.id);
+        return (
+          <li key={r.item}>
+            <label className="flex cursor-pointer items-start gap-3 py-3">
+              <Checkbox checked={!!checked[r.item]} onCheckedChange={(v) => toggle(r.item, !!v)} className="mt-1" />
+              <span className="min-w-0">
+                <span className={checked[r.item] ? "text-muted-foreground line-through" : undefined}>{r.item}</span>
                 <ClaimRefs ids={r.claimIds} />
-              </div>
-              <div className="text-sm text-muted-foreground">{r.detail}</div>
-              <div className="meta-mono mt-1 text-subtle-foreground">Needed for: {r.requiredFor.map(pathName).join(" · ")}</div>
-            </div>
+                <span className="block text-sm text-muted-foreground">
+                  {r.detail}
+                  {!forDefault && ` Only for: ${r.requiredFor.map(pathName).join(", ").toLowerCase()}.`}
+                </span>
+              </span>
+            </label>
           </li>
-        ))}
-      </ul>
-      <p className="meta-mono mt-2 text-subtle-foreground">
-        {done}/{requirements.length} ready · saved in this browser only
-      </p>
-    </div>
+        );
+      })}
+    </ul>
   );
 }

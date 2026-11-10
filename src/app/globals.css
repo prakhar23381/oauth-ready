@@ -194,3 +194,7 @@
 @utility shadow-elevated {
   box-shadow: var(--shadow-elevated);
 }
+
+summary::-webkit-details-marker {
+  display: none;
+}

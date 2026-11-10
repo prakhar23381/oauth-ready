@@ -179,15 +179,27 @@ components:
 | Element | Treatment |
 |---|---|
 | Wordmark | "OAuth Ready" in Geist 500 16px, plus a 20px square `foreground` mark with "OR" in mono. **No Composio logo.** |
-| Verdict card | `card` + **shadow-elevated** (the one per view). The headline is set at 24–26px/400, one step below the page `h1`. Tier chip goes below it, never above. Stats use the `stat` token with `label` captions. The biggest-risk line is plain text with a `warning`-colored icon, not a filled yellow box. |
+| Answer card | `card` + **shadow-elevated** (the one per view). Leads with the time-to-production range at `display` size, then the one-sentence verdict at 17px, three small stats, and the biggest risk as plain text with a `warning`-colored icon. Tier chip sits at the bottom, never above. |
 | Tier badge | Mono label chip: `TIER 3 · FORMAL REVIEW`. Border and text are semantic: T1 success, T2 neutral, T3 warning, T4 destructive. |
 | Owner chips | Mono label chips `AGENT`, `YOU`, `WAIT`, achromatic, with a Lucide icon (Bot / User / Hourglass). No emoji in product chrome. |
 | Evidence chips | Mono superscript chips: `DOC`, `TESTED`, `PROBE`, `COMMUNITY`, `INFERRED`. `TESTED` is success. `COMMUNITY` and conflicts are warning. A quote not found in its source is destructive. All others are neutral. |
-| Path tabs | Mono uppercase tabs. "Most common" goes **after** the label as `(most common)` in subtle text, never above. |
-| Steps | Numbered with mono `01 02 03`, hairline-separated rows (not floating rounded cards). Time estimate is mono meta, right-aligned. |
+| Path picker | Selectable cards: path name, time until real users, tier chip. The default path is selected on load. |
+| Steps | Collapsed rows: mono number, owner icon (User / Bot / Hourglass), title, time. Waiting steps use the `warning` color. Opening a row shows the detail, values to copy, gotchas and links. |
 | Live agent console | A DEV code-surface panel (`code-bg`): mono log lines, a brand pulse dot for "running", success/destructive glyphs for probe results. |
 | Requirements | Square checkboxes. Checked = brand fill with an `brand-on-brand` check. |
 | Section headings | `h2` (500, 22px). No eyebrow. A one-line muted description may follow the heading. |
+
+## 8a. Information hierarchy (progressive disclosure)
+
+A guide holds a lot of facts. The page must not show them all at once.
+
+1. **One answer first.** The top card leads with a single number (time until real users can connect) in the `display` size, then one sentence, three small supporting numbers and one risk. Nothing else.
+2. **Titles by default, detail on demand.** Steps, nuances, blockers, handoff drafts, probes, the claim list and sources are rows that show only a title until opened. Steps have "Expand all".
+3. **One evidence marker per sentence.** However many claims back a sentence, it gets one small chip (`DOC`, `DOC 3`, `MIXED 4`) in the tone of its weakest claim. The popover lists them all.
+4. **Never repeat a block.** Numbers shown in the top card are not shown again in the same form below.
+5. **Mono uppercase is rare.** Use it for chips and nav only. Stat labels and row metadata are small sans or lowercase mono, so they don't compete with headings.
+6. **Paths are compared at a glance.** Each path is a selectable card showing its name, time and tier.
+7. **Orientation.** Wide screens get a sticky section list; sections are separated by a hairline and 48px.
 
 ## 9. Don'ts (quick reference)
 

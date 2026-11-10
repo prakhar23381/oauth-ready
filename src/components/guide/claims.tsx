@@ -61,30 +61,41 @@ export function ClaimDetail({ claim }: { claim: Claim }) {
   );
 }
 
-/** Evidence chips after a sentence. Each opens the claim with its quote and source. */
+const TONE_RANK: Record<Tone, number> = { neutral: 0, success: 0, warning: 1, destructive: 2 };
+
+/**
+ * One quiet evidence marker per sentence, however many claims back it.
+ * It takes the tone of the weakest claim; the popover lists every claim with its quote and source.
+ */
 export function ClaimRefs({ ids, className }: { ids?: string[]; className?: string }) {
   const claims = useContext(ClaimsCtx);
   const list = (ids ?? []).map((id) => claims.get(id)).filter((c): c is Claim => !!c);
   if (!list.length) return null;
+  const tone = list.map(claimTone).sort((a, b) => TONE_RANK[b] - TONE_RANK[a])[0];
+  const statuses = new Set(list.map((c) => c.status));
+  const label = statuses.size === 1 ? STATUS_META[list[0].status].chip : "Mixed";
+  const flagged = list.some((c) => c.conflict || c.verifiedQuote === false);
   return (
-    <span className={cn("ml-1.5 inline-flex flex-wrap gap-1 align-[1px]", className)}>
-      {list.map((c) => (
-        <Popover key={c.id}>
-          <PopoverTrigger
-            aria-label={`Evidence: ${STATUS_META[c.status].label}`}
-            className={cn(
-              "label-mono inline-flex h-4 cursor-pointer items-center gap-0.5 border px-1 text-[9.5px] hover:bg-accent data-popup-open:bg-accent",
-              TONE_CLASS[claimTone(c)],
-            )}
-          >
-            {STATUS_META[c.status].chip}
-            {(c.conflict || c.verifiedQuote === false) && <TriangleAlert className="size-2.5" />}
-          </PopoverTrigger>
-          <PopoverContent className="w-96 max-w-[calc(100vw-2rem)] p-3 shadow-elevated ring-border">
+    <Popover>
+      <PopoverTrigger
+        aria-label={`Evidence: ${list.length} ${list.length === 1 ? "claim" : "claims"}`}
+        className={cn(
+          "label-mono ml-1.5 inline-flex h-4 cursor-pointer items-center gap-1 border px-1 align-[1px] text-[9.5px] hover:bg-accent data-popup-open:bg-accent",
+          TONE_CLASS[tone],
+          className,
+        )}
+      >
+        {label}
+        {list.length > 1 && <span className="opacity-70">{list.length}</span>}
+        {flagged && <TriangleAlert className="size-2.5" />}
+      </PopoverTrigger>
+      <PopoverContent className="max-h-[min(28rem,70vh)] w-96 max-w-[calc(100vw-2rem)] gap-0 divide-y overflow-y-auto p-0 shadow-elevated ring-border">
+        {list.map((c) => (
+          <div key={c.id} className="p-3">
             <ClaimDetail claim={c} />
-          </PopoverContent>
-        </Popover>
-      ))}
-    </span>
+          </div>
+        ))}
+      </PopoverContent>
+    </Popover>
   );
 }
