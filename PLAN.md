@@ -12,7 +12,7 @@
 
 ## 0. Status board (keep this current)
 
-**Current phase:** P1 — domain research (P0 done except GitHub repo + Anthropic key, see blockers)
+**Current phase:** P2 — schema + guide UI (P0 done except GitHub repo + Anthropic key; P1 done → see docs/research-notes.md)
 
 **Blockers / env facts (2026-11-11):**
 - Anthropic: no `ant` CLI/profile, no `ANTHROPIC_API_KEY` on machine → user must create a key and put it in `.env.local` (and later in Vercel env).
@@ -23,7 +23,7 @@
 | Phase | Goal | Timebox | Status |
 |---|---|---|---|
 | P0 | Scaffold, accounts, keys, repo | 0:20 | ◐ (repo + key pending) |
-| P1 | Domain research → taxonomy, seed apps, Composio facts | 0:40 | ☐ |
+| P1 | Domain research → taxonomy, seed apps, Composio facts | 0:40 | ✅ |
 | P2 | Guide schema + guide page rendered from a hand-written fixture | 1:15 | ☐ |
 | P3 | Live research agent + streaming generation UI | 2:00 | ☐ |
 | P4 | Library generation (8–10 apps) + home/library page | 0:45 | ☐ |
@@ -80,7 +80,7 @@ Source: [ASSIGNMENT.md](ASSIGNMENT.md). Every item must be covered before submis
 - 275 require **bring your own OAuth app** (Spotify, Twitter, Shopify, Xero, Pipedrive, DocuSign, Webflow, Tiktok, Meta Ads, Google Chat, Microsoft Word, …).
 - Check programmatically through the toolkit's `composio_managed_auth_schemes`.
 - **Product implication:** a guide must answer "**do I even need my own app yet?**" first. For managed toolkits the answer is: prototype now with Composio's app; you need your own for white-label branding on the consent screen, your own quotas, or scopes and providers Composio doesn't cover. For bring-your-own toolkits, this guide is the critical path.
-- ☐ P1: verify the Composio **redirect/callback URL** that a custom OAuth app must register, and how to create a custom auth config (dashboard + API). Do not guess it.
+- ✅ Composio callback URL: `https://backend.composio.dev/api/v3/toolkits/auth/callback` (verified 2026-11-11, docs.composio.dev/docs/custom-auth-configs). Wiring: create auth config with own creds → pass its id in session `authConfigs`. Details in docs/research-notes.md.
 
 ### 2.3 Why it's hard (hypotheses for P1 to confirm or refute)
 1. **There are two clocks.** "Time to first successful test login" (minutes) and "time until any user can connect" (minutes to months). Docs blur them.
@@ -243,7 +243,8 @@ Guide {
 }
 Range { min, max, unit: "minutes"|"hours"|"days"|"weeks", basis: string }
 Claim { id, text, status: "hands_on"|"official_doc"|"probe"|"community"|"inferred"|"unknown",
-        confidence: "high"|"medium"|"low", sources: { url, quote? }[], verifiedQuote?: boolean }
+        confidence: "high"|"medium"|"low", sources: { url, quote? }[], verifiedQuote?: boolean,
+        conflict?: string /* sources disagree: say how */, asOf?: string }
 VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
         claimChecks: { claimId|text, agentSaid, finding, result: "confirmed"|"corrected"|"unverifiable", source }[] }
 ```
@@ -376,6 +377,10 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 | D5 | Evidence graded per claim + deterministic quote check + hands-on overlays | Sound judgment about evidence; regeneration never erases human verification |
 | D6 | Composio-managed shortcut shown first | Many developers don't need their own app to start; puts the guide in Composio's flow |
 | D7 | Owner chips + handoff kit (manifest/CLI/justifications) | Makes "what the agent does vs. you" concrete |
+| D8 | Don't duplicate Composio's composio.dev/auth screenshot walkthroughs; link them for the final wiring step | They cover clicks, not time/review/blockers/evidence. That gap is our wedge |
+| D9 | Claims can carry `conflict` + `asOf` | P1 found real conflicts (Spotify client-ID cap; Google reassessment anchor date) and fast-changing facts |
+| D10 | Tier rubric 1–4 assigned per path (docs/research-notes.md §5) | Difficulty depends on scopes and audience |
+| D11 | Guides get a "For AI agents" nuance section | Slack non-Marketplace apps get 1 req/min on conversations.history: "approved" ≠ usable for agents |
 
 ## 13. Commands and paths (fill in as created)
 - Dev: `pnpm dev` · Library: `pnpm gen:library` · Typecheck: `pnpm tsc --noEmit`
