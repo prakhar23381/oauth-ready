@@ -12,19 +12,19 @@
 
 ## 0. Status board (keep this current)
 
-**Current phase:** P2 — schema + guide UI (user is creating Groq + Tavily keys; GitHub repo pending user) (P0 done except GitHub repo + Anthropic key; P1 done → see docs/research-notes.md)
+**Current phase:** P3 — live agent pipeline (P0–P2 done; repo: github.com/prakhar23381/oauth-ready, private)
 
 **Blockers / env facts (2026-11-11):**
 - LLM keys: the user has no paid key. They create free keys: **GROQ_API_KEY** (console.groq.com), **TAVILY_API_KEY** (tavily.com), optionally **MISTRAL_API_KEY** (console.mistral.ai, phone verification) and **GOOGLE_GENERATIVE_AI_API_KEY** (aistudio.google.com). These go in `.env.local`, later in Vercel env.
-- GitHub: SSH + `~/.local/bin/gh` (not on PATH) logged in as `prakhar23381`. `gh repo create` was blocked by the permission system; the user must approve or create the repo.
+- GitHub: repo **github.com/prakhar23381/oauth-ready** (private; make public at submission). `gh` is at `~/.local/bin/gh`.
 - Vercel CLI logged in as `prakhar23381-9369`.
 - Stack: Next.js 15.5 + React 19 + Tailwind v4 + shadcn/ui, `src/` dir, pnpm, `@anthropic-ai/sdk` 1.8.0, zod 4, tsx.
 
 | Phase | Goal | Timebox | Status |
 |---|---|---|---|
-| P0 | Scaffold, accounts, keys, repo | 0:20 | ◐ (repo + key pending) |
+| P0 | Scaffold, accounts, keys, repo | 0:20 | ✅ |
 | P1 | Domain research → taxonomy, seed apps, Composio facts | 0:40 | ✅ |
-| P2 | Guide schema + guide page rendered from a hand-written fixture | 1:15 | ☐ |
+| P2 | Guide schema + guide page rendered from a hand-written fixture | 1:15 | ✅ (gmail.json = first library guide) |
 | P3 | Live research agent + streaming generation UI | 2:00 | ☐ |
 | P4 | Library generation (8–10 apps) + home/library page | 0:45 | ☐ |
 | P5 | Verification: hands-on setup attempts + source checks → verification log | 1:15 | ☐ (can overlap P4) |
@@ -389,3 +389,13 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 - Dev: `pnpm dev` · Library: `pnpm gen:library` · Typecheck: `pnpm tsc --noEmit`
 - Env: `.env.local` (never committed); template `.env.example`
 - Live URL: _TBD_ · Repo URL: _TBD_
+
+## 14. Implementation notes (for context recovery)
+- Schema: `src/lib/schema/guide.ts` (Zod 4). Validate library: `pnpm validate` (schema + claim-id references).
+- Library guides: `data/guides/<slug>.json`; hands-on overlays: `data/verification/<slug>.json` (merged in the guide page: confirmed hands_on → status hands_on; corrected → conflict note).
+- Loaders: `src/lib/guides.ts` (library → live store fallback); store: `src/lib/store.ts` (Upstash if env set, else `.data/generated/`).
+- Guide page: `src/app/guides/[slug]/page.tsx`; components in `src/components/guide/` (claims popovers via ClaimsProvider context, path tabs, checklist, share bar).
+- Markdown export: `src/lib/markdown.ts`, served at `/api/guides/[slug]?format=md`.
+- UI kit: shadcn "base-nova" = **Base UI** (not Radix): use `render` prop instead of `asChild`. `cn` comes from the `cn` package (published by shadcn).
+- Screenshots: headless Chrome at `~/Library/Caches/ms-playwright/chromium_headless_shell-1254/chrome-headless-shell-mac-arm64/chrome-headless-shell --headless --screenshot=… --window-size=W,H URL`.
+- Library guide writing recipe (D12): fetch official pages with WebFetch asking for VERBATIM quotes; every claim gets status + quote + source; probe discovery/authorize endpoints with curl; record conflicts and stale sources (e.g. Nylas 2019 cost figure vs CASA 2024 pricing).
