@@ -25,6 +25,7 @@
 | P0 | Scaffold, accounts, keys, repo | 0:20 | ✅ |
 | P1 | Domain research → taxonomy, seed apps, Composio facts | 0:40 | ✅ |
 | P2 | Guide schema + guide page rendered from a hand-written fixture | 1:15 | ✅ (gmail.json = first library guide) |
+| P2.5 | Apply DESIGN.md to the existing UI (fonts, tokens, square, no bold/eyebrows) | 0:30 | ☐ |
 | P3 | Live research agent + streaming generation UI | 2:00 | ☐ |
 | P4 | Library generation (8–10 apps) + home/library page | 0:45 | ☐ |
 | P5 | Verification: hands-on setup attempts + source checks → verification log | 1:15 | ☐ (can overlap P4) |
@@ -383,6 +384,7 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 | D9 | Claims can carry `conflict` + `asOf` | P1 found real conflicts (Spotify client-ID cap; Google reassessment anchor date) and fast-changing facts |
 | D10 | Tier rubric 1–4 assigned per path (docs/research-notes.md §5) | Difficulty depends on scopes and audience |
 | D12 | **Library guides researched by Claude Code in the dev session** (WebSearch/WebFetch, same schema and evidence rules); the in-app agent (free models) handles **live generation** only | Saves scarce free-tier quota for the live demo; library quality is higher; disclosed in README |
+| D13 | **Visual language = Composio's official Brand Hub** → [DESIGN.md](DESIGN.md). DEV dark default, square corners, Geist 400/500 + JetBrains Mono, spot blue #51a2ff for interactive state only; no Composio logo | Reviewers are Composio; official tokens (brand.composio.dev agent.json/llms.txt) beat community DESIGN.md files, which use the retired #0007cd |
 | D11 | Guides get a "For AI agents" nuance section | Slack non-Marketplace apps get 1 req/min on conversations.history: "approved" ≠ usable for agents |
 
 ## 13. Commands and paths (fill in as created)
