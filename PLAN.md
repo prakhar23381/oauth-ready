@@ -12,11 +12,17 @@
 
 ## 0. Status board (keep this current)
 
-**Current phase:** P0 — not started
+**Current phase:** P1 — domain research (P0 done except GitHub repo + Anthropic key, see blockers)
+
+**Blockers / env facts (2026-11-11):**
+- Anthropic: no `ant` CLI/profile, no `ANTHROPIC_API_KEY` on machine → user must create a key and put it in `.env.local` (and later in Vercel env).
+- GitHub: SSH + `~/.local/bin/gh` (not on PATH) logged in as `prakhar23381`. `gh repo create` was blocked by the permission system; the user must approve or create the repo.
+- Vercel CLI logged in as `prakhar23381-9369`.
+- Stack: Next.js 15.5 + React 19 + Tailwind v4 + shadcn/ui, `src/` dir, pnpm, `@anthropic-ai/sdk` 1.8.0, zod 4, tsx.
 
 | Phase | Goal | Timebox | Status |
 |---|---|---|---|
-| P0 | Scaffold, accounts, keys, repo | 0:20 | ☐ |
+| P0 | Scaffold, accounts, keys, repo | 0:20 | ◐ (repo + key pending) |
 | P1 | Domain research → taxonomy, seed apps, Composio facts | 0:40 | ☐ |
 | P2 | Guide schema + guide page rendered from a hand-written fixture | 1:15 | ☐ |
 | P3 | Live research agent + streaming generation UI | 2:00 | ☐ |
