@@ -15,7 +15,7 @@
 **Current phase:** P2 — schema + guide UI (P0 done except GitHub repo + Anthropic key; P1 done → see docs/research-notes.md)
 
 **Blockers / env facts (2026-11-11):**
-- Anthropic: no `ant` CLI/profile, no `ANTHROPIC_API_KEY` on machine → user must create a key and put it in `.env.local` (and later in Vercel env).
+- LLM keys: the user has no paid key. They create free keys: **GROQ_API_KEY** (console.groq.com), **TAVILY_API_KEY** (tavily.com), optionally **MISTRAL_API_KEY** (console.mistral.ai, phone verification) and **GOOGLE_GENERATIVE_AI_API_KEY** (aistudio.google.com). These go in `.env.local`, later in Vercel env.
 - GitHub: SSH + `~/.local/bin/gh` (not on PATH) logged in as `prakhar23381`. `gh repo create` was blocked by the permission system; the user must approve or create the repo.
 - Vercel CLI logged in as `prakhar23381-9369`.
 - Stack: Next.js 15.5 + React 19 + Tailwind v4 + shadcn/ui, `src/` dir, pnpm, `@anthropic-ai/sdk` 1.8.0, zod 4, tsx.
@@ -175,9 +175,9 @@ Next.js (App Router, TS, Tailwind, shadcn/ui)  ── deployed on Vercel
 |---|---|---|
 | Framework | Next.js 15 + TypeScript | One deploy covers UI, API, and streaming; fast to ship |
 | UI | Tailwind + shadcn/ui | Quick and polished |
-| LLM | Claude API, TS SDK `@anthropic-ai/sdk`, model **`claude-opus-5-5`** | Strong research and synthesis; server-side web tools |
-| Web tools | `web_search_20260209`, `web_fetch_20260209` (server-side) | No scraping infra; captured fetch text supports quote verification |
-| Structured output | `output_config: { format: … }` JSON schema derived from Zod (synthesis call only) | Citations API conflicts with `output_config.format`, so we do our own quote-based evidence |
+| LLM | **Free tiers only (no paid key).** Vercel AI SDK (`ai`) with a **provider fallback chain**: Groq (`openai/gpt-oss-120b`, fast, no card) → Mistral free Experiment plan (phone-verified, big token budget) → Gemini AI Studio free key. Picked by env vars; on a 429, try the next provider | The user has no paid key; free limits are low and changing, so no single provider is relied on. Fast models keep the live demo snappy |
+| Web tools | **Search:** Tavily free plan (1,000 credits/mo, no card). **Fetch:** our own server-side fetch + HTML→text extraction (free, unlimited); returns only *relevant excerpts* to the model (keyword-window ranking, ~2k tokens per page) and keeps full text for quote verification | Own fetch = no cost, full control, and token-efficient (free tiers cap tokens/day) |
+| Structured output | AI SDK `generateObject` with the Zod schema (synthesis call), one repair retry | Provider-agnostic structured output |
 | Storage | Library: JSON in repo. Generated: **Upstash Redis** (Vercel Marketplace, free tier); file-store fallback locally | Library is reviewable in git; live guides need a durable share link |
 | Streaming | NDJSON over a `ReadableStream` from a Route Handler | Simple; no websockets |
 | Hosting | Vercel (Fluid compute, `maxDuration = 300`) | Free and fast. Fallback: Railway/Render if generation takes over 300 s |
@@ -195,8 +195,8 @@ Next.js (App Router, TS, Tailwind, shadcn/ui)  ── deployed on Vercel
 5. **Persist** in Redis under the slug (cached; "Regenerate" forces a refresh). Emit a `done` event with the slug.
 
 - Progress events: `stage`, `search`, `fetch`, `fact`, `probe`, `warning`, `done`, `error`. If something fails, still emit a **partial guide** with the unknowns shown, not a blank error page.
-- Request hygiene: streaming, `max_tokens` ~64k on streaming calls, `fallbacks: "default"` with the `server-side-fallback-2026-07-01` beta (refusal fallback; tell the user it's on), `stop_reason` checks (refusal, max_tokens), and typed SDK error handling.
-- ☐ P3 first step: read the claude-api skill's `typescript/claude-api/README.md`, `tool-use.md`, and `streaming.md` before writing agent code. **Don't guess SDK shapes.**
+- Request hygiene: provider fallback on 429/5xx; hard caps (≤ 8 searches, ≤ 10 fetches, ≤ 14 agent steps); token budget per run (~60–80k) so free daily quotas cover the library plus demo; cache everything (search results, fetched pages, guides) in Redis/file store.
+- ☐ P3 first step: check the current Vercel AI SDK docs (tool calling with `stopWhen`, `generateObject`, provider packages `@ai-sdk/groq`, `@ai-sdk/mistral`, `@ai-sdk/google`) and the installed version's types. **Don't guess SDK shapes.**
 
 ### 4.3 Research question bank (drives both the prompt and the schema)
 1. Developer account: free? Requires a company, legal entity, phone number, or paid plan?
@@ -346,6 +346,8 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 ## 9. Risks and mitigations
 | Risk | Mitigation |
 |---|---|
+| Free-tier quota exhausted during the demo | Provider fallback chain, aggressive caching, pre-generated library, run the demo on a fresh daily quota, keep a short screen recording as backup |
+| Free models produce weaker research than frontier models | Narrower question bank, deterministic probes + verifier, per-claim evidence grading, hands-on overlays; note it in README limitations |
 | Live generation over 300 s or flaky during the demo | Tight max_uses, effort tuning, cache, partial-guide fallback, rehearse; Railway fallback host |
 | Hallucinated requirements or timelines | Quote verification, `unknown` allowed, hands-on overlays, consistency rules |
 | Structured-output schema too complex or rejected | Keep the schema flat-ish; validate with Zod; one repair retry |
@@ -371,7 +373,7 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 | # | Decision | Why |
 |---|---|---|
 | D1 | Next.js + Vercel single deploy | Fastest path to a shareable link with streaming |
-| D2 | Claude `claude-opus-5-5` with server-side web_search/web_fetch | Research quality; no scraping infra; captured text enables quote verification |
+| D2 | ~~Claude Opus 5.5~~ → **free-tier provider chain via Vercel AI SDK (Groq → Mistral → Gemini) + Tavily search + own fetch** (changed 2026-11-11: user has no API key and won't pay) | Zero cost; provider fallback absorbs free-tier 429s; quote verification still works because we capture fetched text ourselves. README tells reviewers they can drop in any key. |
 | D3 | Guides are **path-aware** (scope/audience tiers) | Difficulty depends on what you request, not just the provider |
 | D4 | **Active effort and waiting time shown separately** | Answers "an hour vs weeks of waiting" from the brief |
 | D5 | Evidence graded per claim + deterministic quote check + hands-on overlays | Sound judgment about evidence; regeneration never erases human verification |
