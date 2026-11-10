@@ -12,7 +12,7 @@
 
 ## 0. Status board (keep this current)
 
-**Current phase:** P2 — schema + guide UI (P0 done except GitHub repo + Anthropic key; P1 done → see docs/research-notes.md)
+**Current phase:** P2 — schema + guide UI (user is creating Groq + Tavily keys; GitHub repo pending user) (P0 done except GitHub repo + Anthropic key; P1 done → see docs/research-notes.md)
 
 **Blockers / env facts (2026-11-11):**
 - LLM keys: the user has no paid key. They create free keys: **GROQ_API_KEY** (console.groq.com), **TAVILY_API_KEY** (tavily.com), optionally **MISTRAL_API_KEY** (console.mistral.ai, phone verification) and **GOOGLE_GENERATIVE_AI_API_KEY** (aistudio.google.com). These go in `.env.local`, later in Vercel env.
@@ -382,6 +382,7 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 | D8 | Don't duplicate Composio's composio.dev/auth screenshot walkthroughs; link them for the final wiring step | They cover clicks, not time/review/blockers/evidence. That gap is our wedge |
 | D9 | Claims can carry `conflict` + `asOf` | P1 found real conflicts (Spotify client-ID cap; Google reassessment anchor date) and fast-changing facts |
 | D10 | Tier rubric 1–4 assigned per path (docs/research-notes.md §5) | Difficulty depends on scopes and audience |
+| D12 | **Library guides researched by Claude Code in the dev session** (WebSearch/WebFetch, same schema and evidence rules); the in-app agent (free models) handles **live generation** only | Saves scarce free-tier quota for the live demo; library quality is higher; disclosed in README |
 | D11 | Guides get a "For AI agents" nuance section | Slack non-Marketplace apps get 1 req/min on conversations.history: "approved" ≠ usable for agents |
 
 ## 13. Commands and paths (fill in as created)
