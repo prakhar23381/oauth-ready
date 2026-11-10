@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Guide } from "@/lib/schema/guide";
-import { ClaimRefs } from "./claims";
+import { Chip } from "@/components/chip";
+import { ClaimList } from "./claims";
+import { Tip } from "@/components/tip";
 
 export function RequirementsChecklist({ slug, requirements, paths }: { slug: string; requirements: Guide["requirements"]; paths: Guide["paths"] }) {
   const storageKey = `oauth-ready:req:${slug}`;
@@ -27,18 +29,26 @@ export function RequirementsChecklist({ slug, requirements, paths }: { slug: str
       {requirements.map((r) => {
         const forDefault = r.requiredFor.includes("all") || r.requiredFor.includes(def.id);
         return (
-          <li key={r.item}>
-            <label className="flex cursor-pointer items-start gap-3 py-3">
-              <Checkbox checked={!!checked[r.item]} onCheckedChange={(v) => toggle(r.item, !!v)} className="mt-1" />
-              <span className="min-w-0">
-                <span className={checked[r.item] ? "text-muted-foreground line-through" : undefined}>{r.item}</span>
-                <ClaimRefs ids={r.claimIds} />
-                <span className="block text-sm text-muted-foreground">
-                  {r.detail}
-                  {!forDefault && ` Only for: ${r.requiredFor.map(pathName).join(", ").toLowerCase()}.`}
-                </span>
-              </span>
+          <li key={r.item} className="flex items-center gap-3 py-2.5">
+            <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
+              <Checkbox checked={!!checked[r.item]} onCheckedChange={(v) => toggle(r.item, !!v)} />
+              <span className={checked[r.item] ? "text-muted-foreground line-through" : undefined}>{r.item}</span>
             </label>
+            {!forDefault && (
+              <Tip content={`Only needed for: ${r.requiredFor.map(pathName).join(", ").toLowerCase()}.`}>
+                <Chip>Other path</Chip>
+              </Tip>
+            )}
+            <Tip
+              wide
+              label={`About: ${r.item}`}
+              content={
+                <>
+                  <p>{r.detail}</p>
+                  <ClaimList ids={r.claimIds} />
+                </>
+              }
+            />
           </li>
         );
       })}

@@ -14,10 +14,11 @@ export function CopyButton({ value, label = "Copy", className }: { value: string
         setDone(true);
         setTimeout(() => setDone(false), 1500);
       }}
-      className={cn("label-mono inline-flex h-6 shrink-0 items-center gap-1 border border-input bg-card px-2 text-muted-foreground hover:text-foreground", className)}
+      aria-label={label}
+      title={done ? "Copied" : label}
+      className={cn("inline-flex size-7 shrink-0 cursor-pointer items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground", className)}
     >
-      {done ? <Check className="size-3" /> : <Copy className="size-3" />}
-      {done ? "Copied" : label}
+      {done ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
     </button>
   );
 }

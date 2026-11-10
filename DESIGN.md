@@ -193,13 +193,14 @@ components:
 
 A guide holds a lot of facts. The page must not show them all at once.
 
-1. **One answer first.** The top card leads with a single number (time until real users can connect) in the `display` size, then one sentence, three small supporting numbers and one risk. Nothing else.
+1. **One answer first.** The top card leads with a single number (time until real users can connect) in the `display` size, then one sentence, three small supporting numbers and a row of chips (tier, biggest risk, cost, Composio status) whose detail is in tips. Nothing else.
 2. **Titles by default, detail on demand.** Steps, nuances, blockers, handoff drafts, probes, the claim list and sources are rows that show only a title until opened. Steps have "Expand all".
 3. **One evidence marker per sentence.** However many claims back a sentence, it gets one small chip (`DOC`, `DOC 3`, `MIXED 4`) in the tone of its weakest claim. The popover lists them all.
 4. **Never repeat a block.** Numbers shown in the top card are not shown again in the same form below.
 5. **Mono uppercase is rare.** Use it for chips and nav only. Stat labels and row metadata are small sans or lowercase mono, so they don't compete with headings.
 6. **Paths are compared at a glance.** Each path is a selectable card showing its name, time and tier.
-7. **Orientation.** Wide screens get a sticky section list; sections are separated by a hairline and 48px.
+7. **Explanations live in tips, not on the page.** Use `Tip` (src/components/tip.tsx) for anything that explains rather than answers: how a number was estimated, what a tier means, a section's purpose, a requirement's detail, the biggest risk, cost, the Composio note. `Tip` opens on hover, tap and Enter, so it works on phones. Use `Hint` only for short icon labels. Section headings take a `tip`, not a visible intro paragraph. Things the reader must act on (step titles, checklist items, unverified items) stay visible.
+8. **Orientation.** Wide screens get a sticky section list; sections are separated by a hairline and 48px.
 
 ## 9. Don'ts (quick reference)
 

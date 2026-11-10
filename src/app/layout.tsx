@@ -37,8 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </header>
             <main>{children}</main>
             <footer className="mx-auto max-w-[1240px] border-t px-4 py-8 text-[13px] text-muted-foreground sm:px-6 print:hidden">
-              An independent take-home project built for Composio's APM Integrations assignment. It isn't a Composio product. Guides can be
-              wrong or out of date, so check the evidence chips and dates.
+              An independent take-home project, not a Composio product. Guides can be out of date, so check the dates.
             </footer>
           </TooltipProvider>
         </ThemeProvider>

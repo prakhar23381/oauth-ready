@@ -23,7 +23,23 @@ function claimTone(c: Claim): Tone {
 
 export function StatusChip({ status }: { status: Claim["status"] }) {
   const m = STATUS_META[status];
-  return <Chip tone={m.tone} title={m.description}>{m.label}</Chip>;
+  return <Chip tone={m.tone}>{m.label}</Chip>;
+}
+
+/** Claims for the given ids, for use inside a Tip. */
+export function ClaimList({ ids }: { ids?: string[] }) {
+  const claims = useContext(ClaimsCtx);
+  const list = (ids ?? []).map((id) => claims.get(id)).filter((c): c is Claim => !!c);
+  if (!list.length) return null;
+  return (
+    <div className="mt-3 divide-y border-t">
+      {list.map((c) => (
+        <div key={c.id} className="py-3 last:pb-0">
+          <ClaimDetail claim={c} />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function ClaimDetail({ claim }: { claim: Claim }) {
@@ -78,6 +94,9 @@ export function ClaimRefs({ ids, className }: { ids?: string[]; className?: stri
   return (
     <Popover>
       <PopoverTrigger
+        openOnHover
+        delay={150}
+        closeDelay={80}
         aria-label={`Evidence: ${list.length} ${list.length === 1 ? "claim" : "claims"}`}
         className={cn(
           "label-mono ml-1.5 inline-flex h-4 cursor-pointer items-center gap-1 border px-1 align-[1px] text-[9.5px] hover:bg-accent data-popup-open:bg-accent",
