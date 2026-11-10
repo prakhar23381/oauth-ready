@@ -241,6 +241,7 @@ const UNIT_MIN: Record<z.infer<typeof TimeUnit>, number> = {
 
 export function formatRange(r: Range): string {
   const unit = (n: number) => (n === 1 ? r.unit.replace(/s$/, "") : r.unit);
+  if (r.max === 0) return "Immediate";
   if (r.min === r.max) return `${r.min} ${unit(r.max)}`;
   if (r.min === 0) return `up to ${r.max} ${unit(r.max)}`;
   return `${r.min}–${r.max} ${unit(r.max)}`;

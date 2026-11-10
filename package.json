@@ -7,16 +7,13 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "validate": "tsx scripts/validate.ts"
+    "validate": "tsx scripts/validate.ts",
+    "gen": "tsx --env-file=.env.local --conditions=react-server scripts/gen.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.117",
-    "@ai-sdk/groq": "^4.0.81",
-    "@ai-sdk/mistral": "^4.0.84",
     "@base-ui/react": "^1.9.0",
     "@upstash/ratelimit": "^2.2.0",
     "@upstash/redis": "^1.41.0",
-    "ai": "^7.0.169",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
     "geist": "^1.9.2",
