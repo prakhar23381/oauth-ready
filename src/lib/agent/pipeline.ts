@@ -47,6 +47,7 @@ export async function researchGuide(query: string, emit: Emit): Promise<Generate
     },
     usage,
   );
+  if (!plan.found || !plan.appName || !plan.website || plan.queries.length < 3) throw new Error(`"${query}" could not be matched to a software product. Check the spelling, or enter the product's website.`);
   const website = plan.website.startsWith("http") ? plan.website : `https://${plan.website}`;
   const official = [...new Set([cleanDomain(website), ...plan.officialDomains.map(cleanDomain)].filter((d) => d.includes(".")))];
   // A provider's own forum holds user reports, not documentation, so it is graded as community evidence.

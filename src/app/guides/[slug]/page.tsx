@@ -135,6 +135,11 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
               </div>
               <div className="mt-5 flex flex-wrap items-center gap-2">
                 <TierChip tier={p.tier} />
+                {!g.oauthSupported && (
+                  <Tip content={g.oauthNotes ?? "This provider does not offer OAuth for third-party apps."}>
+                    <Chip>No OAuth app required</Chip>
+                  </Tip>
+                )}
                 <Tip content={g.verdict.biggestRisk}>
                   <Chip tone="warning">
                     <TriangleAlert className="size-3" /> Key risk

@@ -132,16 +132,32 @@ export function excerpt(text: string, budgetChars: number): string {
 
 // ---------- quote verification ----------
 
-const norm = (s: string) => s.toLowerCase().replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[*_`#>\[\]()|\\]/g, " ").replace(/\s+/g, " ").trim();
-const bare = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+const stripLinks = (s: string) => s.replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1");
+const norm = (s: string) => stripLinks(s).toLowerCase().replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[*_`#>\[\]()|\\]/g, " ").replace(/\s+/g, " ").trim();
+const bare = (s: string) => stripLinks(s).toLowerCase().replace(/[^a-z0-9]+/g, "");
+const words = (s: string) => stripLinks(s).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim().split(" ");
 
-/** True when the quote appears in the page text (ignoring case, whitespace, markdown and punctuation). */
+/**
+ * True when the quote appears in the page text. Matching ignores case, whitespace, markdown and
+ * punctuation. A quote with an ellipsis must match on each side of it. As a last step, a quote
+ * passes if at least 85% of its five-word sequences occur in the page, which tolerates a dropped
+ * or altered word but not a paraphrase.
+ */
 export function quoteInText(quote: string, text: string): boolean {
-  const q = norm(quote);
-  if (q.length < 12) return false;
-  if (norm(text).includes(q)) return true;
-  const b = bare(quote);
-  return b.length >= 20 && bare(text).includes(b);
+  const parts = quote.split(/\s*(?:…|\.\.\.)\s*/).filter((p) => bare(p).length >= 12);
+  if (!parts.length) return false;
+  const nt = norm(text);
+  const bt = bare(text);
+  if (parts.every((p) => nt.includes(norm(p)) || bt.includes(bare(p)))) return true;
+  const qw = words(quote);
+  if (qw.length < 8) return false;
+  const tw = words(text);
+  const grams = new Set<string>();
+  for (let k = 0; k + 5 <= tw.length; k++) grams.add(tw.slice(k, k + 5).join(" "));
+  let hit = 0;
+  const total = qw.length - 4;
+  for (let k = 0; k + 5 <= qw.length; k++) if (grams.has(qw.slice(k, k + 5).join(" "))) hit++;
+  return hit / total >= 0.85;
 }
 
 export const hostOf = (url: string) => {

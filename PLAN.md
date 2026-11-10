@@ -12,7 +12,7 @@
 
 ## 0. Status board (keep this current)
 
-**Current phase:** P3 — live agent pipeline (P0–P2.5 done; repo: github.com/prakhar23381/oauth-ready, private)
+**Current phase:** P4 — library guides (P0–P3 done; repo: github.com/prakhar23381/oauth-ready, private)
 
 **Blockers / env facts (2026-11-11):**
 - LLM keys: the user has no paid key. They create free keys: **GROQ_API_KEY** (console.groq.com), **TAVILY_API_KEY** (tavily.com), optionally **MISTRAL_API_KEY** (console.mistral.ai, phone verification) and **GOOGLE_GENERATIVE_AI_API_KEY** (aistudio.google.com). These go in `.env.local`, later in Vercel env.
@@ -26,7 +26,7 @@
 | P1 | Domain research → taxonomy, seed apps, Composio facts | 0:40 | ✅ |
 | P2 | Guide schema + guide page rendered from a hand-written fixture | 1:15 | ✅ (gmail.json = first library guide) |
 | P2.5 | Apply DESIGN.md to the existing UI (fonts, tokens, square, no bold/eyebrows) | 0:30 | ✅ |
-| P3 | Live research agent + streaming generation UI | 2:00 | ☐ |
+| P3 | Live research agent + streaming generation UI | 2:00 | ✅ (Strava 83s, Pipedrive 63s, OpenWeatherMap 40s; nonsense query refused) |
 | P4 | Library generation (8–10 apps) + home/library page | 0:45 | ☐ |
 | P5 | Verification: hands-on setup attempts + source checks → verification log | 1:15 | ☐ (can overlap P4) |
 | P6 | Deploy, share features, polish, guardrails | 0:45 | ☐ |
@@ -391,6 +391,15 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 - Dev: `pnpm dev` · Library: `pnpm gen:library` · Typecheck: `pnpm tsc --noEmit`
 - Env: `.env.local` (never committed); template `.env.example`
 - Live URL: _TBD_ · Repo URL: _TBD_
+
+## 14a. The live agent as built (P3)
+- **No SDK.** `src/lib/agent/llm.ts` is a small OpenAI-compatible JSON client. Each model is a "lane" with its own token bucket; calls pick the best lane with room, wait when none has, and move lanes on a 429. Lanes come from env keys: Groq (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b`), plus Mistral and Gemini if their keys are set. (D2 superseded: the Vercel AI SDK was removed.)
+- **Measured Groq free limits (2026-11-11):** 8,000 tokens/minute per model, refilled continuously (~133 tokens/s), 1,000 requests/day per model. Daily token cap is not exposed in headers. A guide uses 22–36k tokens over 10–11 calls.
+- **Pipeline** (`src/lib/agent/pipeline.ts`): identify (1 search + 1 call; refuses unmatched queries) → search (6 Tavily queries with page text) → read (3 parallel extraction calls; facts = claim + verbatim quote + source id) → follow up (1 call picks ≤3 gap searches, then more extraction) → write (3 parallel calls: plan, details, materials; they cite fact ids and source ids only, never URLs) → verify (every quote checked against page text; unmatched → status `inferred`, flagged).
+- **Deterministic parts:** claims are built from facts in code; evidence grade comes from the source host (provider docs = official; forums, even on the provider's domain, = community); Composio status, callback URL step value and the Composio wiring material are injected in code; tier/wait consistency rules; critical topics with no facts go to `unknowns`.
+- **Probes** (`probe.ts`): OIDC/OAuth discovery at common hosts, PKCE, dynamic registration, authorize endpoint with an invalid client. **Safe fetch** (`web.ts`): https only, public IPs only, size and time caps.
+- **Run it:** `pnpm gen "<app>" [--save]` (CLI), or the UI at `/generate?q=`. API: `POST /api/generate {query, force}` streams NDJSON `AgentEvent`s. Tavily cost: 7–10 credits per guide.
+- **Known weak spots:** path choice varies between runs; steps are mostly owner "you"; 5–25% of quotes fail matching and are flagged.
 
 ## 14. Implementation notes (for context recovery)
 - Schema: `src/lib/schema/guide.ts` (Zod 4). Validate library: `pnpm validate` (schema + claim-id references).

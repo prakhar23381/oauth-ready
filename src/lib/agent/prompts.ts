@@ -26,18 +26,19 @@ const STYLE = `Style: professional and neutral, as in technical documentation. S
 
 // ---------- 1. identify ----------
 export const ResolveOut = z.object({
-  appName: z.string().min(1),
-  website: z.string().min(3),
+  found: z.boolean().catch(true),
+  appName: z.string().default(""),
+  website: z.string().default(""),
   category: z.string().optional(),
   officialDomains: z.array(z.string()).default([]),
   oauth: z.enum(["yes", "no", "unclear"]).catch("unclear"),
   authNote: z.string().default(""),
-  queries: z.array(z.string().min(4)).min(3).max(7),
+  queries: z.array(z.string()).max(8).default([]),
 });
 export const RESOLVE_SYSTEM = `You plan research for a guide on registering an OAuth app with a software provider and getting it approved for production use.
 Given a user's query (an app name or website) and a few search results, identify the provider and plan the searches.
 Reply with one JSON object:
-{"appName": canonical product name, "website": main https URL, "category": short category, "officialDomains": [domains the provider itself controls, including developer docs and help-centre domains, without https://], "oauth": "yes" | "no" | "unclear" (does it offer OAuth 2.0 for third-party apps), "authNote": one sentence on how third-party apps authenticate, "queries": [5 or 6 web search queries]}
+{"found": true if the query clearly refers to a real software product or service that appears in the search results, false if it is gibberish, ambiguous or not a software product (never substitute a different product), "appName": canonical product name, "website": main https URL, "category": short category, "officialDomains": [domains the provider itself controls, including developer docs and help-centre domains, without https://], "oauth": "yes" | "no" | "unclear" (does it offer OAuth 2.0 for third-party apps), "authNote": one sentence on how third-party apps authenticate, "queries": [5 or 6 web search queries]}
 The queries must together cover: creating the OAuth app (developer console, redirect URIs, scopes); app review, verification or production approval requirements; limits before approval (user caps, development mode, quotas, rate limits); token lifetimes and refresh; partner, business or pricing requirements; and one query for developer reports of how long approval takes. Include the product name and the current year where useful.`;
 
 // ---------- 2. extract ----------
