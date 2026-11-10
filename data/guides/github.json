@@ -1,0 +1,696 @@
+{
+  "slug": "github",
+  "appName": "GitHub",
+  "website": "https://github.com",
+  "logoUrl": "https://www.google.com/s2/favicons?domain=github.com&sz=64",
+  "category": "Developer tools",
+  "oauthSupported": true,
+  "oauthNotes": "Two app types: OAuth apps and GitHub Apps. Both are registered in Developer settings without review.",
+  "composio": {
+    "status": "managed",
+    "toolkitName": "GitHub",
+    "note": "Composio provides a managed OAuth app for GitHub, so development can start without registering your own. A custom OAuth app is needed for your own branding on the consent screen, dedicated quota, or scopes beyond Composio's defaults.",
+    "setupGuideUrl": "https://composio.dev/auth/github"
+  },
+  "summary": "Registering a GitHub OAuth app is self-service and takes minutes, with no review before any GitHub user can authorise it. The work is in choosing between an OAuth app and a GitHub App, and in handling organisations that restrict OAuth app access by default.",
+  "verdict": {
+    "headline": "Testing is available within minutes. Production access requires no review: any GitHub user can authorise the app as soon as it is registered.",
+    "biggestRisk": "New organisations restrict OAuth app access by default, so an organisation owner must approve the app before members can grant it access to organisation resources.",
+    "claimIds": [
+      "g-cr-register",
+      "g-noreview",
+      "g-or-default"
+    ]
+  },
+  "paths": [
+    {
+      "id": "oauth-app",
+      "name": "OAuth app",
+      "whenThisApplies": "The agent acts as the signed-in user across everything that user can access. This is what Composio's GitHub toolkit uses.",
+      "isDefault": true,
+      "tier": 1,
+      "timeToFirstLogin": {
+        "min": 5,
+        "max": 10,
+        "unit": "minutes",
+        "basis": "Registration form only."
+      },
+      "activeEffort": {
+        "min": 15,
+        "max": 30,
+        "unit": "minutes",
+        "basis": "Registration, credentials and a test authorisation."
+      },
+      "waitTime": {
+        "min": 0,
+        "max": 0,
+        "unit": "minutes",
+        "basis": "No provider review on this path."
+      },
+      "timeToProduction": {
+        "min": 15,
+        "max": 30,
+        "unit": "minutes",
+        "basis": "No review step is documented. Registration is self-service."
+      },
+      "steps": [
+        {
+          "id": "o1",
+          "phase": "create",
+          "title": "Register a new OAuth app",
+          "owner": "you",
+          "detail": "In Settings, open Developer settings, then OAuth apps, and select New OAuth App. Enter the application name, homepage URL and callback URL.",
+          "links": [
+            {
+              "label": "Creating an OAuth app",
+              "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app"
+            },
+            {
+              "label": "Developer settings",
+              "url": "https://github.com/settings/developers"
+            }
+          ],
+          "copyValues": [
+            {
+              "label": "Redirect URI to register (Composio callback)",
+              "value": "https://backend.composio.dev/api/v3/toolkits/auth/callback"
+            }
+          ],
+          "gotchas": [
+            "Register the app under an organisation account, not a personal one, so ownership does not depend on one person."
+          ],
+          "claimIds": [
+            "g-cr-register",
+            "g-cr-10cb",
+            "c-composio-callback"
+          ],
+          "estTime": {
+            "min": 5,
+            "max": 10,
+            "unit": "minutes",
+            "basis": "Console steps."
+          }
+        },
+        {
+          "id": "o2",
+          "phase": "configure",
+          "title": "Generate a client secret",
+          "owner": "you",
+          "detail": "Generate the secret and add the client ID and secret to a Composio auth config.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [],
+          "estTime": {
+            "min": 5,
+            "max": 5,
+            "unit": "minutes",
+            "basis": "Console steps."
+          }
+        },
+        {
+          "id": "o3",
+          "phase": "configure",
+          "title": "Select the minimum scopes",
+          "owner": "agent",
+          "detail": "The agent proposes the narrowest scopes for the tools the product uses. See Prepared materials.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [
+            "g-df-act"
+          ],
+          "estTime": {
+            "min": 5,
+            "max": 10,
+            "unit": "minutes",
+            "basis": "Drafting only."
+          }
+        },
+        {
+          "id": "o4",
+          "phase": "test",
+          "title": "Run a test authorisation",
+          "owner": "you",
+          "detail": "Authorise with a test account and confirm the granted scopes. PKCE is supported with the S256 method only.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [
+            "g-au-pkce"
+          ],
+          "estTime": {
+            "min": 5,
+            "max": 10,
+            "unit": "minutes",
+            "basis": "Console steps."
+          }
+        }
+      ],
+      "claimIds": []
+    },
+    {
+      "id": "github-app",
+      "name": "GitHub App",
+      "whenThisApplies": "The product needs fine-grained, per-repository permissions or short-lived tokens. GitHub recommends this type in general.",
+      "isDefault": false,
+      "tier": 1,
+      "timeToFirstLogin": {
+        "min": 15,
+        "max": 30,
+        "unit": "minutes",
+        "basis": "Estimate. More configuration than an OAuth app. No direct source."
+      },
+      "activeEffort": {
+        "min": 30,
+        "max": 60,
+        "unit": "minutes",
+        "basis": "Estimate. No direct source."
+      },
+      "waitTime": {
+        "min": 0,
+        "max": 0,
+        "unit": "minutes",
+        "basis": "No provider review on this path."
+      },
+      "timeToProduction": {
+        "min": 30,
+        "max": 60,
+        "unit": "minutes",
+        "basis": "Estimate. No review step is documented."
+      },
+      "steps": [
+        {
+          "id": "a1",
+          "phase": "create",
+          "title": "Register a GitHub App",
+          "owner": "you",
+          "detail": "In Developer settings, register a GitHub App and select its repository and organisation permissions.",
+          "links": [
+            {
+              "label": "GitHub Apps and OAuth apps compared",
+              "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps"
+            }
+          ],
+          "copyValues": [
+            {
+              "label": "Redirect URI to register (Composio callback)",
+              "value": "https://backend.composio.dev/api/v3/toolkits/auth/callback"
+            }
+          ],
+          "gotchas": [],
+          "claimIds": [
+            "g-df-pref",
+            "g-df-fine",
+            "c-composio-callback"
+          ],
+          "estTime": {
+            "min": 15,
+            "max": 30,
+            "unit": "minutes",
+            "basis": "Estimate."
+          }
+        },
+        {
+          "id": "a2",
+          "phase": "test",
+          "title": "Install the app and test",
+          "owner": "you",
+          "detail": "Install the app on an account or organisation you own. Installation access tokens expire after 1 hour.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [
+            "Confirm that your integration layer supports GitHub App installation tokens before choosing this type."
+          ],
+          "claimIds": [
+            "g-df-1h"
+          ],
+          "estTime": {
+            "min": 15,
+            "max": 30,
+            "unit": "minutes",
+            "basis": "Estimate."
+          }
+        }
+      ],
+      "claimIds": []
+    }
+  ],
+  "requirements": [
+    {
+      "item": "GitHub account or organisation",
+      "detail": "The app is owned by a user or an organisation. Each can own up to 100 OAuth apps.",
+      "requiredFor": [
+        "all"
+      ],
+      "claimIds": [
+        "g-cr-100"
+      ]
+    },
+    {
+      "item": "Homepage URL",
+      "detail": "Required on the registration form.",
+      "requiredFor": [
+        "all"
+      ],
+      "claimIds": [
+        "g-cr-register"
+      ]
+    },
+    {
+      "item": "HTTPS callback URL",
+      "detail": "Up to 10 callback URLs can be registered.",
+      "requiredFor": [
+        "all"
+      ],
+      "claimIds": [
+        "g-cr-10cb"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "title": "Organisations restrict OAuth apps by default",
+      "detail": "New organisations have OAuth app access restrictions enabled. Members can authorise the app, but it cannot reach organisation resources until an owner approves it.",
+      "forAgents": false,
+      "severity": "warn",
+      "claimIds": [
+        "g-or-default",
+        "g-or-request"
+      ]
+    },
+    {
+      "title": "Rate limit is 5,000 requests per hour per user",
+      "detail": "OAuth tokens use the authorising user's limit, shared with that user's other tokens. OAuth app limits do not scale with usage.",
+      "forAgents": true,
+      "severity": "warn",
+      "claimIds": [
+        "g-df-5000",
+        "g-df-noscale",
+        "g-rl-shared"
+      ]
+    },
+    {
+      "title": "Ten tokens per user, app and scope combination",
+      "detail": "Issuing an eleventh token revokes an existing one, so store and reuse tokens.",
+      "forAgents": true,
+      "severity": "warn",
+      "claimIds": [
+        "g-au-10",
+        "g-au-revoke"
+      ]
+    },
+    {
+      "title": "Token expiry is optional for OAuth apps",
+      "detail": "OAuth apps can be configured to issue user access tokens that expire after eight hours. With expiry enabled, refresh tokens expire after six months without use.",
+      "forAgents": true,
+      "severity": "info",
+      "claimIds": [
+        "g-df-8h",
+        "g-au-6mo"
+      ]
+    },
+    {
+      "title": "GitHub recommends GitHub Apps",
+      "detail": "GitHub Apps use fine-grained permissions and let the user choose which repositories the app can access.",
+      "forAgents": false,
+      "severity": "info",
+      "claimIds": [
+        "g-df-pref",
+        "g-df-fine"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "symptom": "Organisation repositories are missing after authorisation",
+      "cause": "The organisation has OAuth app access restrictions enabled and has not approved the app.",
+      "fix": "Ask the user to request approval from an organisation owner on the authorisation screen, or have an owner approve the app in the organisation's third-party access settings.",
+      "claimIds": [
+        "g-or-default",
+        "g-or-request"
+      ]
+    },
+    {
+      "symptom": "A stored token stops working unexpectedly",
+      "cause": "More than ten tokens were issued for the same user, app and scope combination.",
+      "fix": "Reuse the stored token instead of re-authorising on each run.",
+      "claimIds": [
+        "g-au-10",
+        "g-au-revoke"
+      ]
+    },
+    {
+      "symptom": "redirect_uri mismatch error",
+      "cause": "The redirect URL's host and port must match the registered callback URL.",
+      "fix": "Register the exact Composio callback URL as a callback URL.",
+      "claimIds": [
+        "g-au-redirect"
+      ]
+    }
+  ],
+  "handoffKit": [
+    {
+      "kind": "form_values",
+      "title": "Registration form values",
+      "content": "Application name: <Your product name>\nHomepage URL: https://<yourdomain>\nApplication description: <One-line description shown to users>\nAuthorization callback URL: https://backend.composio.dev/api/v3/toolkits/auth/callback\nEnable Device Flow: off, unless the product runs without a browser"
+    },
+    {
+      "kind": "checklist",
+      "title": "OAuth app or GitHub App",
+      "content": "Choose an OAuth app when: the agent acts as the user everywhere the user has access, and Composio's GitHub toolkit is used as provided.\nChoose a GitHub App when: customers require per-repository access, short-lived tokens (1 hour) or rate limits that scale with the installation.\nGitHub's stated position: GitHub Apps are preferred in general."
+    },
+    {
+      "kind": "composio_config",
+      "title": "Connect the OAuth app to Composio",
+      "content": "1. In the Composio dashboard, open Auth Configs and create one for GitHub using OAuth2 with your own developer credentials.\n2. Enter the client ID and client secret. Set the redirect URI to https://backend.composio.dev/api/v3/toolkits/auth/callback\n3. Pass the auth config ID (ac_...) in your session's authConfigs, keyed by toolkit. Creating the auth config alone does not apply it.\nReference: https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app"
+    }
+  ],
+  "probes": [
+    {
+      "check": "OAuth discovery document",
+      "target": "github.com and common subdomains",
+      "result": "No discovery document at the standard locations checked. Endpoints are taken from the documentation.",
+      "ok": false,
+      "at": "2026-11-11"
+    },
+    {
+      "check": "Authorization endpoint responds",
+      "target": "https://github.com/login/oauth/authorize",
+      "result": "HTTP 302 for an invalid client ID. The endpoint is live.",
+      "ok": true,
+      "at": "2026-11-11"
+    }
+  ],
+  "claims": [
+    {
+      "id": "g-cr-register",
+      "text": "An OAuth app is registered in Developer settings with a name, homepage URL and callback URL.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+          "quote": "Click Register application."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-noreview",
+      "text": "No review or approval step is documented for OAuth apps.",
+      "status": "inferred",
+      "confidence": "medium",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+          "title": "Creating an OAuth app (no review step is described)"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-cr-100",
+      "text": "A user or organisation can own up to 100 OAuth apps.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+          "quote": "A user or organization can own up to 100 OAuth apps."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-cr-10cb",
+      "text": "Up to 10 callback URLs can be registered.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+          "quote": "You can enter up to 10 callback URLs."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-df-pref",
+      "text": "GitHub generally prefers GitHub Apps over OAuth apps.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+          "quote": "In general, GitHub Apps are preferred over OAuth apps."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-df-fine",
+      "text": "GitHub Apps use fine-grained permissions and give users control over repository access.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+          "quote": "GitHub Apps use fine-grained permissions, give the user more control over which repositories the app can access"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-df-act",
+      "text": "OAuth apps act as the authenticated user.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+          "quote": "users authorize OAuth apps, which gives the app the ability to act as the authenticated user."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-df-1h",
+      "text": "GitHub App installation access tokens expire after 1 hour.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+          "quote": "Installation access tokens expire after a predefined amount of time (currently 1 hour)."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-df-8h",
+      "text": "OAuth apps can be configured to issue user access tokens that expire after eight hours.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+          "quote": "You can also configure your OAuth app to use user access tokens that expire after eight hours"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-df-5000",
+      "text": "OAuth tokens use the user's limit of 5,000 requests per hour.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+          "quote": "OAuth tokens use the user's rate limit of 5,000 requests per hour."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-df-noscale",
+      "text": "OAuth app rate limits are lower than GitHub App limits and do not scale.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+          "quote": "Conversely, OAuth apps have lower rate limits and do not scale."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-rl-shared",
+      "text": "Requests from a user's tokens and authorised apps share one personal limit.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api",
+          "quote": "All of these requests count towards your personal rate limit of 5,000 requests per hour."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-au-pkce",
+      "text": "PKCE is supported with the S256 method only.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+          "quote": "Must be `S256` - the `plain` code challenge method is not supported."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-au-redirect",
+      "text": "The redirect URL's host and port must match the registered callback URL.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+          "quote": "the redirect URL's host (excluding subdomains) and port must exactly match the callback URL"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-au-10",
+      "text": "At most ten tokens are issued per user, application and scope combination.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+          "quote": "There is a limit of ten tokens that are issued per user/application/scope combination"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-au-revoke",
+      "text": "When the limit is exceeded, GitHub revokes an existing token.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+          "quote": "GitHub revokes one of the existing tokens"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-au-6mo",
+      "text": "Refresh tokens expire after six months without use.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+          "quote": "expires after six months without use."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-or-default",
+      "text": "New organisations have OAuth app access restrictions enabled by default.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/about-oauth-app-access-restrictions",
+          "quote": "When you create a new organization, OAuth app access restrictions are enabled by default."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "g-or-request",
+      "text": "Members can request owner approval for an OAuth app.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/about-oauth-app-access-restrictions",
+          "quote": "Users can request owner approval for OAuth apps they'd like to use"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "c-composio-callback",
+      "text": "Composio's redirect URI for custom OAuth apps is https://backend.composio.dev/api/v3/toolkits/auth/callback.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.composio.dev/docs/custom-auth-configs",
+          "title": "Composio: custom auth configs",
+          "quote": "https://backend.composio.dev/api/v3/toolkits/auth/callback"
+        }
+      ],
+      "asOf": "2026-11-11"
+    }
+  ],
+  "unknowns": [
+    "Whether GitHub applies any undocumented review to OAuth apps with large user counts. None is described in the documentation read.",
+    "Whether Composio's GitHub toolkit supports GitHub App installation tokens."
+  ],
+  "sources": [
+    {
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "title": "GitHub Docs: creating an OAuth app",
+      "kind": "official",
+      "fetchedAt": "2026-11-11"
+    },
+    {
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+      "title": "GitHub Docs: differences between GitHub Apps and OAuth apps",
+      "kind": "official",
+      "fetchedAt": "2026-11-11"
+    },
+    {
+      "url": "https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api",
+      "title": "GitHub Docs: REST API rate limits",
+      "kind": "official",
+      "fetchedAt": "2026-11-11"
+    },
+    {
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+      "title": "GitHub Docs: authorizing OAuth apps",
+      "kind": "official",
+      "fetchedAt": "2026-11-11"
+    },
+    {
+      "url": "https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/about-oauth-app-access-restrictions",
+      "title": "GitHub Docs: OAuth app access restrictions",
+      "kind": "official",
+      "fetchedAt": "2026-11-11"
+    },
+    {
+      "url": "https://docs.composio.dev/docs/custom-auth-configs",
+      "title": "docs.composio.dev/docs/custom-auth-configs",
+      "kind": "composio",
+      "fetchedAt": "2026-11-11"
+    }
+  ],
+  "generatedAt": "2026-11-11",
+  "generator": {
+    "kind": "library",
+    "by": "Claude Code research session (WebSearch/WebFetch) + live probes",
+    "pipelineVersion": "0.2"
+  }
+}

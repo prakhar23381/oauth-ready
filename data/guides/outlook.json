@@ -1,0 +1,779 @@
+{
+  "slug": "outlook",
+  "appName": "Outlook (Microsoft Graph)",
+  "website": "https://outlook.com",
+  "logoUrl": "https://www.google.com/s2/favicons?domain=outlook.com&sz=64",
+  "category": "Email and calendar",
+  "oauthSupported": true,
+  "oauthNotes": "OAuth 2.0 and OpenID Connect through the Microsoft identity platform. Apps are registered in Microsoft Entra ID and call Microsoft Graph.",
+  "composio": {
+    "status": "managed",
+    "toolkitName": "Outlook",
+    "note": "Composio provides a managed OAuth app for Outlook, so development can start without registering your own. A custom OAuth app is needed for your own branding on the consent screen, dedicated quota, or scopes beyond Composio's defaults.",
+    "setupGuideUrl": "https://composio.dev/auth"
+  },
+  "summary": "Registering an app in Microsoft Entra ID is immediate and has no review. For a multitenant app, the practical requirement is publisher verification: without it, users in other organisations are often unable to consent. Verification is free and takes minutes once a verified Microsoft partner account exists.",
+  "verdict": {
+    "headline": "Testing is available within minutes. Production access for users in other organisations requires publisher verification, which completes in minutes once a verified Microsoft AI Cloud Partner Program account and a custom domain are in place.",
+    "biggestRisk": "Where risk-based step-up consent is enabled, users cannot consent to a multitenant app from an unverified publisher, and many organisations require administrator consent regardless.",
+    "claimIds": [
+      "m-pv-nov2020",
+      "m-pv-minutes",
+      "m-pv-cpp",
+      "m-pc-admin"
+    ]
+  },
+  "paths": [
+    {
+      "id": "multitenant",
+      "name": "Multitenant app for other organisations",
+      "whenThisApplies": "Users in any Microsoft Entra tenant, and optionally personal Microsoft accounts, connect their mailbox. This is the usual case for a SaaS agent.",
+      "isDefault": true,
+      "tier": 2,
+      "timeToFirstLogin": {
+        "min": 10,
+        "max": 20,
+        "unit": "minutes",
+        "basis": "App registration and a test sign-in in your own tenant."
+      },
+      "activeEffort": {
+        "min": 2,
+        "max": 6,
+        "unit": "hours",
+        "basis": "Estimate. Partner account enrolment, domain verification and configuration. No direct source."
+      },
+      "waitTime": {
+        "min": 1,
+        "max": 7,
+        "unit": "days",
+        "basis": "Estimate. Microsoft states that verification completes in minutes once the prerequisites are met. The time to verify a new partner account is not stated in the sources read."
+      },
+      "timeToProduction": {
+        "min": 1,
+        "max": 7,
+        "unit": "days",
+        "basis": "Estimate. Depends on whether a verified partner account already exists."
+      },
+      "cost": "No charge for publisher verification. An Azure account with an active subscription is listed as a prerequisite for registration.",
+      "steps": [
+        {
+          "id": "t1",
+          "phase": "account",
+          "title": "Use a work or school account in an Entra tenant",
+          "owner": "you",
+          "detail": "Register the app with a Microsoft Entra work or school account. Apps registered with a personal Microsoft account cannot be publisher verified.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [
+            "m-pv-work",
+            "m-rg-prereq"
+          ],
+          "estTime": {
+            "min": 5,
+            "max": 15,
+            "unit": "minutes",
+            "basis": "Account setup."
+          }
+        },
+        {
+          "id": "t2",
+          "phase": "create",
+          "title": "Register the application",
+          "owner": "you",
+          "detail": "In the Microsoft Entra admin centre, open App registrations and select New registration. Choose a multitenant account type.",
+          "links": [
+            {
+              "label": "Register an application",
+              "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app"
+            },
+            {
+              "label": "Microsoft Entra admin centre",
+              "url": "https://entra.microsoft.com"
+            }
+          ],
+          "copyValues": [],
+          "gotchas": [
+            "The application cannot be moved between tenants after creation."
+          ],
+          "claimIds": [
+            "m-rg-steps",
+            "m-rg-multi",
+            "m-rg-move"
+          ],
+          "estTime": {
+            "min": 5,
+            "max": 10,
+            "unit": "minutes",
+            "basis": "Console steps."
+          }
+        },
+        {
+          "id": "t3",
+          "phase": "configure",
+          "title": "Add the redirect URI and a client secret",
+          "owner": "you",
+          "detail": "Add a Web platform redirect URI and create a client secret. Add both to a Composio auth config.",
+          "links": [],
+          "copyValues": [
+            {
+              "label": "Redirect URI to register (Composio callback)",
+              "value": "https://backend.composio.dev/api/v3/toolkits/auth/callback"
+            }
+          ],
+          "gotchas": [],
+          "claimIds": [
+            "c-composio-callback"
+          ],
+          "estTime": {
+            "min": 5,
+            "max": 10,
+            "unit": "minutes",
+            "basis": "Console steps."
+          }
+        },
+        {
+          "id": "t4",
+          "phase": "configure",
+          "title": "Select delegated permissions",
+          "owner": "agent",
+          "detail": "The agent proposes the narrowest Microsoft Graph delegated permissions. High-privilege permissions require administrator consent.",
+          "links": [
+            {
+              "label": "Permissions and consent",
+              "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview"
+            }
+          ],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [
+            "m-pc-delegated",
+            "m-pc-admin"
+          ],
+          "estTime": {
+            "min": 10,
+            "max": 20,
+            "unit": "minutes",
+            "basis": "Drafting only."
+          }
+        },
+        {
+          "id": "t5",
+          "phase": "review",
+          "title": "Enrol in the Microsoft AI Cloud Partner Program",
+          "owner": "you",
+          "detail": "Create or use the organisation's partner global account and complete its verification.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [
+            "The partner account's email domain must match the app's publisher domain or a DNS-verified custom domain.",
+            "The publisher domain cannot be an onmicrosoft.com domain."
+          ],
+          "claimIds": [
+            "m-pv-cpp",
+            "m-pv-domain",
+            "m-pv-onms"
+          ]
+        },
+        {
+          "id": "t6",
+          "phase": "wait",
+          "title": "Microsoft verifies the partner account",
+          "owner": "provider",
+          "detail": "Verification of a new partner account is handled by Microsoft Partner Center.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [],
+          "estTime": {
+            "min": 1,
+            "max": 7,
+            "unit": "days",
+            "basis": "Estimate. Not stated in the sources read."
+          }
+        },
+        {
+          "id": "t7",
+          "phase": "launch",
+          "title": "Mark the app as publisher verified",
+          "owner": "you",
+          "detail": "Associate the verified Partner ID with the app registration, signed in with multifactor authentication.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [
+            "m-pv-minutes",
+            "m-pv-mfa",
+            "m-pv-roles"
+          ],
+          "estTime": {
+            "min": 5,
+            "max": 15,
+            "unit": "minutes",
+            "basis": "Microsoft: verified in minutes once requirements are met."
+          }
+        }
+      ],
+      "claimIds": []
+    },
+    {
+      "id": "single-tenant",
+      "name": "Single-tenant app for your own organisation",
+      "whenThisApplies": "Only users in your own Microsoft Entra tenant use the app.",
+      "isDefault": false,
+      "tier": 1,
+      "timeToFirstLogin": {
+        "min": 10,
+        "max": 20,
+        "unit": "minutes",
+        "basis": "App registration and sign-in."
+      },
+      "activeEffort": {
+        "min": 15,
+        "max": 30,
+        "unit": "minutes",
+        "basis": "Console steps."
+      },
+      "waitTime": {
+        "min": 0,
+        "max": 0,
+        "unit": "minutes",
+        "basis": "No provider review on this path."
+      },
+      "timeToProduction": {
+        "min": 15,
+        "max": 30,
+        "unit": "minutes",
+        "basis": "No verification is needed inside your own tenant."
+      },
+      "steps": [
+        {
+          "id": "n1",
+          "phase": "create",
+          "title": "Register a single-tenant application",
+          "owner": "you",
+          "detail": "Microsoft recommends the single-tenant option for most applications.",
+          "links": [],
+          "copyValues": [
+            {
+              "label": "Redirect URI to register (Composio callback)",
+              "value": "https://backend.composio.dev/api/v3/toolkits/auth/callback"
+            }
+          ],
+          "gotchas": [],
+          "claimIds": [
+            "m-rg-single",
+            "c-composio-callback"
+          ],
+          "estTime": {
+            "min": 5,
+            "max": 10,
+            "unit": "minutes",
+            "basis": "Console steps."
+          }
+        },
+        {
+          "id": "n2",
+          "phase": "configure",
+          "title": "Grant administrator consent",
+          "owner": "you",
+          "detail": "An administrator grants consent once for the organisation.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [
+            "m-pc-admin"
+          ],
+          "estTime": {
+            "min": 5,
+            "max": 10,
+            "unit": "minutes",
+            "basis": "Console steps."
+          }
+        }
+      ],
+      "claimIds": []
+    }
+  ],
+  "requirements": [
+    {
+      "item": "Microsoft Entra tenant with a work or school account",
+      "detail": "The registering account needs at least the Application Developer role.",
+      "requiredFor": [
+        "all"
+      ],
+      "claimIds": [
+        "m-rg-prereq",
+        "m-pv-work"
+      ]
+    },
+    {
+      "item": "Verified Microsoft AI Cloud Partner Program account",
+      "detail": "It must be the organisation's partner global account.",
+      "requiredFor": [
+        "multitenant"
+      ],
+      "claimIds": [
+        "m-pv-cpp"
+      ]
+    },
+    {
+      "item": "Custom verified domain",
+      "detail": "Set as the app's publisher domain. An onmicrosoft.com domain is not accepted.",
+      "requiredFor": [
+        "multitenant"
+      ],
+      "claimIds": [
+        "m-pv-domain",
+        "m-pv-onms"
+      ]
+    },
+    {
+      "item": "Multifactor authentication",
+      "detail": "Required for the user who initiates verification.",
+      "requiredFor": [
+        "multitenant"
+      ],
+      "claimIds": [
+        "m-pv-mfa"
+      ]
+    },
+    {
+      "item": "Administrator roles in Entra ID and Partner Center",
+      "detail": "Application Administrator or Cloud Application Administrator, and CPP Partner Admin or Account Admin.",
+      "requiredFor": [
+        "multitenant"
+      ],
+      "claimIds": [
+        "m-pv-roles"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "title": "Unverified publishers are blocked from user consent",
+      "detail": "Where risk-based step-up consent is enabled, users cannot consent to most multitenant apps registered after 8 November 2020 that are not publisher verified and request more than basic sign-in.",
+      "forAgents": false,
+      "severity": "blocker",
+      "claimIds": [
+        "m-pv-nov2020"
+      ]
+    },
+    {
+      "title": "Administrators may need to consent",
+      "detail": "Application permissions and many high-privilege delegated permissions can be granted only by an administrator.",
+      "forAgents": false,
+      "severity": "warn",
+      "claimIds": [
+        "m-pc-admin"
+      ]
+    },
+    {
+      "title": "Refresh tokens last 90 days",
+      "detail": "The default lifetime is 90 days, or 24 hours for single-page applications. Each use returns a replacement token.",
+      "forAgents": true,
+      "severity": "warn",
+      "claimIds": [
+        "m-rt-90",
+        "m-rt-replace"
+      ]
+    },
+    {
+      "title": "Refresh tokens can be revoked at any time",
+      "detail": "The sign-in service can revoke tokens before expiry, for example after an administrator action. The agent must handle re-authentication.",
+      "forAgents": true,
+      "severity": "warn",
+      "claimIds": [
+        "m-rt-revoke"
+      ]
+    },
+    {
+      "title": "Publisher verification is free",
+      "detail": "Microsoft does not charge for it and no licence is required.",
+      "forAgents": false,
+      "severity": "info",
+      "claimIds": [
+        "m-pv-free"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "symptom": "Users see an unverified publisher warning and cannot consent",
+      "cause": "The app is multitenant and not publisher verified.",
+      "fix": "Complete publisher verification. Until then, ask a tenant administrator to grant consent.",
+      "claimIds": [
+        "m-pv-nov2020"
+      ]
+    },
+    {
+      "symptom": "Consent prompt requires an administrator",
+      "cause": "The requested permissions are high privilege, or the tenant restricts user consent.",
+      "fix": "Reduce the requested permissions, or provide the customer's administrator with an admin consent link.",
+      "claimIds": [
+        "m-pc-admin"
+      ]
+    },
+    {
+      "symptom": "Publisher verification fails on domain",
+      "cause": "The partner account's email domain does not match the publisher domain, or the publisher domain is an onmicrosoft.com domain.",
+      "fix": "Add and DNS-verify a custom domain in the tenant and set it as the publisher domain.",
+      "claimIds": [
+        "m-pv-domain",
+        "m-pv-onms"
+      ]
+    }
+  ],
+  "handoffKit": [
+    {
+      "kind": "cli",
+      "title": "Register the app with Azure CLI",
+      "content": "az ad app create \\\n  --display-name \"<Your product name>\" \\\n  --sign-in-audience AzureADandPersonalMicrosoftAccount \\\n  --web-redirect-uris https://backend.composio.dev/api/v3/toolkits/auth/callback\n\n# Drafted from the Azure CLI reference, not executed. Confirm the flags with: az ad app create --help"
+    },
+    {
+      "kind": "form_values",
+      "title": "App registration values",
+      "content": "Name: <Your product name>\nSupported account types: Any Entra ID tenant + personal Microsoft accounts (or Multiple Entra ID tenants for work accounts only)\nRedirect URI (Web): https://backend.composio.dev/api/v3/toolkits/auth/callback\nPublisher domain: <yourdomain> (custom, DNS verified)"
+    },
+    {
+      "kind": "checklist",
+      "title": "Permission selection",
+      "content": "Request delegated permissions only, and the narrowest that work.\nRead mail: Mail.Read. Send mail: Mail.Send. Read and write mail: Mail.ReadWrite.\nCalendar: Calendars.Read or Calendars.ReadWrite.\nInclude offline_access to receive refresh tokens.\nPermission names are from the Microsoft Graph reference and were not re-verified in this research."
+    },
+    {
+      "kind": "composio_config",
+      "title": "Connect the OAuth app to Composio",
+      "content": "1. In the Composio dashboard, open Auth Configs and create one for Outlook using OAuth2 with your own developer credentials.\n2. Enter the client ID and client secret. Set the redirect URI to https://backend.composio.dev/api/v3/toolkits/auth/callback\n3. Pass the auth config ID (ac_...) in your session's authConfigs, keyed by toolkit. Creating the auth config alone does not apply it.\nReference: https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app"
+    }
+  ],
+  "probes": [
+    {
+      "check": "OAuth discovery document",
+      "target": "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
+      "result": "Found. Authorization endpoint: https://login.microsoftonline.com/common/oauth2/v2.0/authorize. Token endpoint: https://login.microsoftonline.com/common/oauth2/v2.0/token.",
+      "ok": true,
+      "at": "2026-11-11"
+    },
+    {
+      "check": "PKCE support",
+      "target": "code_challenge_methods_supported",
+      "result": "Not advertised in the discovery document.",
+      "ok": false,
+      "at": "2026-11-11"
+    },
+    {
+      "check": "Dynamic client registration",
+      "target": "registration_endpoint",
+      "result": "Not advertised. The app must be registered in the Entra admin centre, CLI or Graph API.",
+      "ok": false,
+      "at": "2026-11-11"
+    }
+  ],
+  "claims": [
+    {
+      "id": "m-pv-nov2020",
+      "text": "With risk-based step-up consent enabled, users cannot consent to most newly registered multitenant apps that are not publisher verified.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+          "quote": "Beginning November 2020, if risk-based step-up consent is enabled, users can't consent to most newly registered multitenant apps that aren't publisher verified."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-pv-minutes",
+      "text": "Developers who already meet the requirements can be verified in minutes.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+          "quote": "Developers who have already met these requirements can be verified in minutes."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-pv-cpp",
+      "text": "Verification requires a verified Microsoft AI Cloud Partner Program account that is the organisation's partner global account.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+          "quote": "The CPP account must be the partner global account (PGA) for the developer's organization."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-pv-work",
+      "text": "Apps registered with a personal Microsoft account cannot be publisher verified.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+          "quote": "Apps that are registered by using a Microsoft account can't be publisher verified."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-pv-domain",
+      "text": "The partner account's email domain must match the publisher domain or a DNS-verified custom domain.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+          "quote": "The domain of the email address that's used during CPP account verification must either match the publisher domain that's set for the app or be a DNS-verified custom domain that's added to the Microsoft Entra tenant."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-pv-onms",
+      "text": "The publisher domain cannot be an onmicrosoft.com domain.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+          "quote": "the app's publisher domain can't be *.onmicrosoft.com to be publisher verified"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-pv-mfa",
+      "text": "The user who initiates verification must sign in with multifactor authentication.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+          "quote": "The user who initiates verification must sign in by using Microsoft Entra multifactor authentication."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-pv-roles",
+      "text": "The initiating user needs administrator roles in both Entra ID and Partner Center.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+          "quote": "The user who initiates the verification must have one of the required roles in both Microsoft Entra ID and Partner Center."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-pv-free",
+      "text": "Microsoft does not charge for publisher verification.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+          "quote": "Microsoft doesn't charge developers for publisher verification. No license is required to become a verified publisher."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-rg-prereq",
+      "text": "Registration requires an Azure account with an active subscription and at least the Application Developer role.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "The Azure account must be at least an Application Developer."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-rg-steps",
+      "text": "Apps are registered under App registrations in the Microsoft Entra admin centre.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "Browse to Entra ID > App registrations and select New registration."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-rg-multi",
+      "text": "The multitenant account type lets users in any Microsoft Entra tenant use the application.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "For multitenant apps when you want users in any Microsoft Entra tenant to be able to use your application."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-rg-single",
+      "text": "Microsoft recommends the single-tenant option for most applications.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "We recommend Single tenant only - <your tenant> for most applications."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-rg-move",
+      "text": "An application object cannot be moved between tenants.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+          "quote": "Once created, you can't move the application object between different tenants."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-pc-delegated",
+      "text": "Delegated permissions let the application act on a user's behalf, limited to what that user can access.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview",
+          "quote": "The application isn't able to access anything the signed in user couldn't access."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-pc-admin",
+      "text": "Application permissions and many high-privilege delegated permissions require administrator consent.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview",
+          "quote": "application permissions and many high-privilege delegated permissions can only be consented to by an administrator."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-rt-90",
+      "text": "The default refresh token lifetime is 90 days, or 24 hours for single-page applications.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/refresh-tokens",
+          "quote": "90 days for all other scenarios."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-rt-replace",
+      "text": "Refresh tokens replace themselves on every use.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/refresh-tokens",
+          "quote": "Refresh tokens replace themselves with a fresh token upon every use."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "m-rt-revoke",
+      "text": "Refresh tokens can be revoked by the sign-in service at any time.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://learn.microsoft.com/en-us/entra/identity-platform/refresh-tokens",
+          "quote": "they can be revoked by the sign-in service at any time before their expiration."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "c-composio-callback",
+      "text": "Composio's redirect URI for custom OAuth apps is https://backend.composio.dev/api/v3/toolkits/auth/callback.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.composio.dev/docs/custom-auth-configs",
+          "title": "Composio: custom auth configs",
+          "quote": "https://backend.composio.dev/api/v3/toolkits/auth/callback"
+        }
+      ],
+      "asOf": "2026-11-11"
+    }
+  ],
+  "unknowns": [
+    "How long Microsoft takes to verify a new AI Cloud Partner Program account. The sources read give no figure.",
+    "Microsoft Graph throttling limits for mail. They were not read for this guide.",
+    "Whether Microsoft's terms restrict use of Graph data with AI models. The terms were not read for this guide.",
+    "Whether a paid Azure subscription is needed in practice. The quickstart lists an active subscription as a prerequisite and links to a free account."
+  ],
+  "sources": [
+    {
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+      "title": "Microsoft Learn: publisher verification overview",
+      "kind": "official",
+      "fetchedAt": "2026-11-11"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+      "title": "Microsoft Learn: register an application",
+      "kind": "official",
+      "fetchedAt": "2026-11-11"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview",
+      "title": "Microsoft Learn: permissions and consent overview",
+      "kind": "official",
+      "fetchedAt": "2026-11-11"
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/refresh-tokens",
+      "title": "Microsoft Learn: refresh tokens",
+      "kind": "official",
+      "fetchedAt": "2026-11-11"
+    },
+    {
+      "url": "https://docs.composio.dev/docs/custom-auth-configs",
+      "title": "docs.composio.dev/docs/custom-auth-configs",
+      "kind": "composio",
+      "fetchedAt": "2026-11-11"
+    }
+  ],
+  "generatedAt": "2026-11-11",
+  "generator": {
+    "kind": "library",
+    "by": "Claude Code research session (WebSearch/WebFetch) + live probes",
+    "pipelineVersion": "0.2"
+  }
+}

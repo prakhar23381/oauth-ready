@@ -1,0 +1,732 @@
+{
+  "slug": "spotify",
+  "appName": "Spotify",
+  "website": "https://spotify.com",
+  "logoUrl": "https://www.google.com/s2/favicons?domain=spotify.com&sz=64",
+  "category": "Music streaming",
+  "oauthSupported": true,
+  "oauthNotes": "OAuth 2.0 through the Spotify Developer Dashboard. Every app starts in development mode.",
+  "composio": {
+    "status": "bring_your_own",
+    "toolkitName": "Spotify",
+    "note": "Composio lists Spotify as requiring your own OAuth app. Register the app with Spotify, then add its client ID and secret to a Composio auth config.",
+    "setupGuideUrl": "https://composio.dev/auth"
+  },
+  "summary": "A Spotify app works within minutes for up to 5 allowlisted users. Serving the public requires extended quota mode, which Spotify grants only to registered organisations with a launched service and at least 250,000 monthly active users.",
+  "verdict": {
+    "headline": "Testing is available within minutes for up to 5 allowlisted users. Public access requires extended quota mode, which is open only to organisations with at least 250,000 monthly active users, and its review takes up to six weeks.",
+    "biggestRisk": "Most new products cannot meet the eligibility criteria for extended quota mode, so they remain limited to 5 users.",
+    "claimIds": [
+      "p-dev-5",
+      "p-ext-250k",
+      "p-ext-6w",
+      "p-ext-org"
+    ]
+  },
+  "paths": [
+    {
+      "id": "extended-quota",
+      "name": "Public app in extended quota mode",
+      "whenThisApplies": "Any Spotify user must be able to connect. Requires meeting Spotify's eligibility criteria.",
+      "isDefault": true,
+      "tier": 4,
+      "timeToFirstLogin": {
+        "min": 10,
+        "max": 15,
+        "unit": "minutes",
+        "basis": "Create an app in the dashboard and allowlist a test user."
+      },
+      "activeEffort": {
+        "min": 4,
+        "max": 10,
+        "unit": "hours",
+        "basis": "Estimate. Partner application and supporting material. No direct source."
+      },
+      "waitTime": {
+        "min": 1,
+        "max": 6,
+        "unit": "weeks",
+        "basis": "Spotify: the review can take up to six weeks."
+      },
+      "timeToProduction": {
+        "min": 2,
+        "max": 6,
+        "unit": "weeks",
+        "basis": "Only if the eligibility criteria are met. Otherwise this path is not available."
+      },
+      "cost": "Spotify Premium subscription for the app owner while in development mode.",
+      "steps": [
+        {
+          "id": "e1",
+          "phase": "account",
+          "title": "Confirm eligibility before building",
+          "owner": "you",
+          "detail": "Extended quota mode requires a legally registered organisation, a launched service and at least 250,000 monthly active users.",
+          "links": [
+            {
+              "label": "Quota modes",
+              "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes"
+            }
+          ],
+          "copyValues": [],
+          "gotchas": [
+            "Applications from individuals have not been accepted since 15 May 2025."
+          ],
+          "claimIds": [
+            "p-ext-org",
+            "p-ext-entity",
+            "p-ext-launched",
+            "p-ext-250k"
+          ],
+          "estTime": {
+            "min": 15,
+            "max": 30,
+            "unit": "minutes",
+            "basis": "Reading the criteria."
+          }
+        },
+        {
+          "id": "e2",
+          "phase": "create",
+          "title": "Create the app in the Developer Dashboard",
+          "owner": "you",
+          "detail": "Create the app, add the redirect URI, and note the client ID and secret. The owner account needs Spotify Premium.",
+          "links": [
+            {
+              "label": "Developer Dashboard",
+              "url": "https://developer.spotify.com/dashboard"
+            }
+          ],
+          "copyValues": [
+            {
+              "label": "Redirect URI to register (Composio callback)",
+              "value": "https://backend.composio.dev/api/v3/toolkits/auth/callback"
+            }
+          ],
+          "gotchas": [],
+          "claimIds": [
+            "p-dev-premium",
+            "c-composio-callback"
+          ],
+          "estTime": {
+            "min": 10,
+            "max": 15,
+            "unit": "minutes",
+            "basis": "Console steps."
+          }
+        },
+        {
+          "id": "e3",
+          "phase": "test",
+          "title": "Allowlist test users and test",
+          "owner": "you",
+          "detail": "Add each tester to the app's allowlist. Up to 5 users can use the app in development mode.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [
+            "Users who are not allowlisted receive HTTP 403."
+          ],
+          "claimIds": [
+            "p-dev-5",
+            "p-dev-allow",
+            "p-dev-403"
+          ],
+          "estTime": {
+            "min": 10,
+            "max": 20,
+            "unit": "minutes",
+            "basis": "Console steps."
+          }
+        },
+        {
+          "id": "e4",
+          "phase": "review",
+          "title": "Prepare the partner application",
+          "owner": "agent",
+          "detail": "The agent drafts the use case description and scope justification. See Prepared materials.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [],
+          "estTime": {
+            "min": 2,
+            "max": 4,
+            "unit": "hours",
+            "basis": "Estimate. No direct source."
+          }
+        },
+        {
+          "id": "e5",
+          "phase": "review",
+          "title": "Submit the application from a company email",
+          "owner": "you",
+          "detail": "Submit the partner application. After it is approved, request the move to extended quota mode.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [
+            "p-ext-email",
+            "p-ext-move"
+          ],
+          "estTime": {
+            "min": 30,
+            "max": 60,
+            "unit": "minutes",
+            "basis": "Form submission."
+          }
+        },
+        {
+          "id": "e6",
+          "phase": "wait",
+          "title": "Spotify reviews the request",
+          "owner": "provider",
+          "detail": "The review can take up to six weeks.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [
+            "p-ext-6w"
+          ],
+          "estTime": {
+            "min": 1,
+            "max": 6,
+            "unit": "weeks",
+            "basis": "Spotify documentation."
+          }
+        }
+      ],
+      "claimIds": []
+    },
+    {
+      "id": "development",
+      "name": "Development mode for up to 5 users",
+      "whenThisApplies": "A prototype, internal tool or personal project with a small, known set of users.",
+      "isDefault": false,
+      "tier": 1,
+      "timeToFirstLogin": {
+        "min": 10,
+        "max": 15,
+        "unit": "minutes",
+        "basis": "Create an app and allowlist a user."
+      },
+      "activeEffort": {
+        "min": 15,
+        "max": 30,
+        "unit": "minutes",
+        "basis": "Console steps."
+      },
+      "waitTime": {
+        "min": 0,
+        "max": 0,
+        "unit": "minutes",
+        "basis": "No provider review on this path."
+      },
+      "timeToProduction": {
+        "min": 15,
+        "max": 30,
+        "unit": "minutes",
+        "basis": "Available immediately, limited to 5 allowlisted users."
+      },
+      "cost": "Spotify Premium subscription for the app owner.",
+      "steps": [
+        {
+          "id": "d1",
+          "phase": "create",
+          "title": "Create the app and add the redirect URI",
+          "owner": "you",
+          "detail": "Create the app in the Developer Dashboard with a Premium account.",
+          "links": [],
+          "copyValues": [
+            {
+              "label": "Redirect URI to register (Composio callback)",
+              "value": "https://backend.composio.dev/api/v3/toolkits/auth/callback"
+            }
+          ],
+          "gotchas": [],
+          "claimIds": [
+            "p-dev-premium",
+            "c-composio-callback"
+          ],
+          "estTime": {
+            "min": 10,
+            "max": 15,
+            "unit": "minutes",
+            "basis": "Console steps."
+          }
+        },
+        {
+          "id": "d2",
+          "phase": "configure",
+          "title": "Add users to the allowlist",
+          "owner": "you",
+          "detail": "Each user must be added before they can authorise the app.",
+          "links": [],
+          "copyValues": [],
+          "gotchas": [],
+          "claimIds": [
+            "p-dev-allow",
+            "p-dev-5"
+          ],
+          "estTime": {
+            "min": 5,
+            "max": 10,
+            "unit": "minutes",
+            "basis": "Console steps."
+          }
+        }
+      ],
+      "claimIds": []
+    }
+  ],
+  "requirements": [
+    {
+      "item": "Spotify Premium for the app owner",
+      "detail": "Development mode apps stop working if the owner's subscription lapses.",
+      "requiredFor": [
+        "all"
+      ],
+      "claimIds": [
+        "p-dev-premium",
+        "p-mg-premium"
+      ]
+    },
+    {
+      "item": "Legally registered organisation",
+      "detail": "Required for extended quota mode. Individuals cannot apply.",
+      "requiredFor": [
+        "extended-quota"
+      ],
+      "claimIds": [
+        "p-ext-org",
+        "p-ext-entity"
+      ]
+    },
+    {
+      "item": "Launched service",
+      "detail": "The product must already be operating.",
+      "requiredFor": [
+        "extended-quota"
+      ],
+      "claimIds": [
+        "p-ext-launched"
+      ]
+    },
+    {
+      "item": "At least 250,000 monthly active users",
+      "detail": "Minimum active user base for extended quota mode.",
+      "requiredFor": [
+        "extended-quota"
+      ],
+      "claimIds": [
+        "p-ext-250k"
+      ]
+    },
+    {
+      "item": "Company email address",
+      "detail": "The application must be sent from one.",
+      "requiredFor": [
+        "extended-quota"
+      ],
+      "claimIds": [
+        "p-ext-email"
+      ]
+    }
+  ],
+  "nuances": [
+    {
+      "title": "Extended quota mode requires 250,000 monthly active users",
+      "detail": "The threshold applies together with the organisation and launched-service criteria. A product that cannot meet it is limited to 5 users.",
+      "forAgents": false,
+      "severity": "blocker",
+      "claimIds": [
+        "p-ext-250k",
+        "p-ext-entity",
+        "p-ext-launched"
+      ]
+    },
+    {
+      "title": "Development mode is capped at 5 allowlisted users",
+      "detail": "Each user must be added to the allowlist. Apps created before February 2026 keep their earlier limits.",
+      "forAgents": false,
+      "severity": "warn",
+      "claimIds": [
+        "p-dev-5",
+        "p-dev-allow",
+        "p-mg-grandfather"
+      ]
+    },
+    {
+      "title": "Web API endpoints were removed in February 2026",
+      "detail": "Batch endpoints are no longer available and playlist track endpoints were renamed. New apps were affected from 11 February 2026 and existing apps from 9 March 2026.",
+      "forAgents": true,
+      "severity": "warn",
+      "claimIds": [
+        "p-mg-batch",
+        "p-mg-rename"
+      ]
+    },
+    {
+      "title": "Client ID limit changed twice in 2026",
+      "detail": "New developers were limited to one Client ID in February 2026. The limit was raised to 25 in July 2026.",
+      "forAgents": false,
+      "severity": "info",
+      "claimIds": [
+        "p-mg-25"
+      ]
+    },
+    {
+      "title": "Extended quota mode has a higher rate limit",
+      "detail": "Development mode apps have a lower rate limit than extended quota mode apps.",
+      "forAgents": true,
+      "severity": "info",
+      "claimIds": [
+        "p-ext-rate"
+      ]
+    }
+  ],
+  "blockers": [
+    {
+      "symptom": "A user receives HTTP 403 after authorising",
+      "cause": "The user is not on the app's allowlist, or the 5-user cap is reached.",
+      "fix": "Add the user in the Developer Dashboard. Beyond 5 users, extended quota mode is required.",
+      "claimIds": [
+        "p-dev-403",
+        "p-dev-5"
+      ]
+    },
+    {
+      "symptom": "The app stops working for all users",
+      "cause": "The owner's Spotify Premium subscription lapsed.",
+      "fix": "Renew the subscription on the owner account.",
+      "claimIds": [
+        "p-mg-premium"
+      ]
+    },
+    {
+      "symptom": "Extended quota application is not accepted",
+      "cause": "The applicant is an individual or does not meet the user threshold.",
+      "fix": "Apply as a registered organisation from a company email once the criteria are met. No alternative route is documented.",
+      "claimIds": [
+        "p-ext-org",
+        "p-ext-250k"
+      ]
+    }
+  ],
+  "handoffKit": [
+    {
+      "kind": "form_values",
+      "title": "Developer Dashboard values",
+      "content": "App name: <Your product name>\nApp description: <One-line description>\nWebsite: https://<yourdomain>\nRedirect URI: https://backend.composio.dev/api/v3/toolkits/auth/callback\nAPIs used: Web API"
+    },
+    {
+      "kind": "justification",
+      "title": "Draft use case description",
+      "content": "<Product> lets a user control playback and manage their own playlists through an assistant. It requests only the scopes needed for the features the user enables, acts only on that user's account, and does not use Spotify content to train machine learning models. <Confirm this statement against Spotify's Developer Terms before submitting.>"
+    },
+    {
+      "kind": "composio_config",
+      "title": "Connect the OAuth app to Composio",
+      "content": "1. In the Composio dashboard, open Auth Configs and create one for Spotify using OAuth2 with your own developer credentials.\n2. Enter the client ID and client secret. Set the redirect URI to https://backend.composio.dev/api/v3/toolkits/auth/callback\n3. Pass the auth config ID (ac_...) in your session's authConfigs, keyed by toolkit. Creating the auth config alone does not apply it.\nReference: https://docs.composio.dev/docs/authentication/custom-app-vs-managed-app"
+    }
+  ],
+  "probes": [
+    {
+      "check": "OAuth discovery document",
+      "target": "https://accounts.spotify.com/.well-known/openid-configuration",
+      "result": "Found. Authorization endpoint: https://accounts.spotify.com/oauth2/v2/auth. Token endpoint: https://accounts.spotify.com/api/token.",
+      "ok": true,
+      "at": "2026-11-10"
+    },
+    {
+      "check": "PKCE support",
+      "target": "https://accounts.spotify.com/.well-known/openid-configuration",
+      "result": "Advertised: S256",
+      "ok": true,
+      "at": "2026-11-10"
+    },
+    {
+      "check": "Dynamic client registration",
+      "target": "https://accounts.spotify.com/.well-known/openid-configuration",
+      "result": "Not advertised. The OAuth client must be created manually in the provider's console.",
+      "ok": false,
+      "at": "2026-11-10"
+    },
+    {
+      "check": "Authorization endpoint responds",
+      "target": "https://accounts.spotify.com/oauth2/v2/auth",
+      "result": "HTTP 400 for an invalid client ID. The endpoint is live and rejects unknown clients.",
+      "ok": true,
+      "at": "2026-11-10"
+    }
+  ],
+  "claims": [
+    {
+      "id": "p-dev-5",
+      "text": "Up to 5 authenticated users can use an app in development mode.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "Up to 5 authenticated Spotify users can use an app that is in development mode"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-dev-allow",
+      "text": "Each user must be added to the app's allowlist.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "Each Spotify user who installs your app will need to be added to your app's allowlist before they can use it."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-dev-premium",
+      "text": "The app owner must have Spotify Premium for a development mode app to function.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "The app owner must have a Spotify Premium account for apps in development mode to function."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-dev-403",
+      "text": "Requests for users who are not allowlisted receive HTTP 403.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "API requests with an access token associated to that user and app will receive a 403 status code error."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-ext-org",
+      "text": "Since 15 May 2025, Spotify accepts extended quota applications only from organisations.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "Please note that as of May 15th 2025, Spotify only accepts applications from organizations (not individuals)."
+        }
+      ],
+      "asOf": "2025-05-15"
+    },
+    {
+      "id": "p-ext-entity",
+      "text": "Applicants must be a legally registered business or organisation.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "Established Business Entity (legally registered business or organisation)"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-ext-launched",
+      "text": "Applicants must operate an active, launched service.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "Operating an active, and Launched Service"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-ext-250k",
+      "text": "Applicants must have at least 250,000 monthly active users.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "Maintaining a minimum of active users (at least 250k MAUs)"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-ext-email",
+      "text": "The application must be sent from a company email address.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "Application must be sent through a company email"
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-ext-move",
+      "text": "After approval, the developer asks Spotify to move the app into extended quota mode.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "you can ask Spotify to move your app from development mode into extended quota mode."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-ext-6w",
+      "text": "The review can take up to six weeks.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "This review process can take up to six weeks."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-ext-rate",
+      "text": "Extended quota mode apps have a higher rate limit.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+          "quote": "Extended quota mode apps also have access to a higher rate limit than development mode apps do."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-mg-premium",
+      "text": "All development mode apps require an active Premium subscription on the owner account.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide",
+          "quote": "All Development Mode apps require the app owner to have an active Spotify Premium subscription."
+        }
+      ],
+      "asOf": "2026-02-11"
+    },
+    {
+      "id": "p-mg-25",
+      "text": "The Client ID limit per developer was raised to 25 in July 2026.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide",
+          "quote": "As of July 2026, the Client IDs per developer limit has been increased to 25."
+        }
+      ],
+      "asOf": "2026-07",
+      "conflict": "The February 2026 announcement set the limit at one Client ID per developer. Articles written before July 2026 still state one."
+    },
+    {
+      "id": "p-mg-grandfather",
+      "text": "Apps with more than 5 users or multiple Client IDs before the change retain them.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide",
+          "quote": "Existing apps are grandfathered: If you already have multiple Client IDs or more than 5 users, you will retain them."
+        }
+      ],
+      "asOf": "2026-11-11"
+    },
+    {
+      "id": "p-mg-batch",
+      "text": "Batch endpoints are no longer available.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide",
+          "quote": "The following batch endpoints are no longer available. Fetch items individually instead."
+        }
+      ],
+      "asOf": "2026-02-11"
+    },
+    {
+      "id": "p-mg-rename",
+      "text": "Playlist track endpoints were renamed from /tracks to /items.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide",
+          "quote": "The playlist track management endpoints have been renamed from `/tracks` to `/items`:"
+        }
+      ],
+      "asOf": "2026-02-11"
+    },
+    {
+      "id": "c-composio-callback",
+      "text": "Composio's redirect URI for custom OAuth apps is https://backend.composio.dev/api/v3/toolkits/auth/callback.",
+      "status": "official_doc",
+      "confidence": "high",
+      "sources": [
+        {
+          "url": "https://docs.composio.dev/docs/custom-auth-configs",
+          "title": "Composio: custom auth configs",
+          "quote": "https://backend.composio.dev/api/v3/toolkits/auth/callback"
+        }
+      ],
+      "asOf": "2026-11-11"
+    }
+  ],
+  "unknowns": [
+    "Whether Spotify's Developer Terms restrict use of its content with AI models. The terms were not read for this guide.",
+    "Access and refresh token lifetimes. The pages read do not state them.",
+    "The numeric rate limits for development mode and extended quota mode. Spotify does not publish them on the pages read.",
+    "How strictly the 250,000 monthly active user threshold is applied in practice."
+  ],
+  "sources": [
+    {
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "title": "Spotify for Developers: quota modes",
+      "kind": "official",
+      "fetchedAt": "2026-11-11"
+    },
+    {
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide",
+      "title": "Spotify for Developers: February 2026 migration guide",
+      "kind": "official",
+      "fetchedAt": "2026-11-11"
+    },
+    {
+      "url": "https://docs.composio.dev/docs/custom-auth-configs",
+      "title": "docs.composio.dev/docs/custom-auth-configs",
+      "kind": "composio",
+      "fetchedAt": "2026-11-11"
+    }
+  ],
+  "generatedAt": "2026-11-11",
+  "generator": {
+    "kind": "library",
+    "by": "Claude Code research session (WebSearch/WebFetch) + live probes",
+    "pipelineVersion": "0.2"
+  }
+}

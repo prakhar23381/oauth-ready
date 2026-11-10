@@ -1,0 +1,746 @@
+{
+  "summary": {
+    "checkedAt": "2026-11-10",
+    "total": 105,
+    "matched": 105,
+    "notFound": 0,
+    "unreachable": 0
+  },
+  "rows": [
+    {
+      "slug": "github",
+      "claimId": "g-cr-register",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "quote": "Click Register application.",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-cr-100",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "quote": "A user or organization can own up to 100 OAuth apps.",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-cr-10cb",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+      "quote": "You can enter up to 10 callback URLs.",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-df-pref",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+      "quote": "In general, GitHub Apps are preferred over OAuth apps.",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-df-fine",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+      "quote": "GitHub Apps use fine-grained permissions, give the user more control over which repositories the app can access",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-df-act",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+      "quote": "users authorize OAuth apps, which gives the app the ability to act as the authenticated user.",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-df-1h",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+      "quote": "Installation access tokens expire after a predefined amount of time (currently 1 hour).",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-df-8h",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+      "quote": "You can also configure your OAuth app to use user access tokens that expire after eight hours",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-df-5000",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+      "quote": "OAuth tokens use the user's rate limit of 5,000 requests per hour.",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-df-noscale",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/differences-between-github-apps-and-oauth-apps",
+      "quote": "Conversely, OAuth apps have lower rate limits and do not scale.",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-rl-shared",
+      "url": "https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api",
+      "quote": "All of these requests count towards your personal rate limit of 5,000 requests per hour.",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-au-pkce",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+      "quote": "Must be `S256` - the `plain` code challenge method is not supported.",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-au-redirect",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+      "quote": "the redirect URL's host (excluding subdomains) and port must exactly match the callback URL",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-au-10",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+      "quote": "There is a limit of ten tokens that are issued per user/application/scope combination",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-au-revoke",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+      "quote": "GitHub revokes one of the existing tokens",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-au-6mo",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps",
+      "quote": "expires after six months without use.",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-or-default",
+      "url": "https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/about-oauth-app-access-restrictions",
+      "quote": "When you create a new organization, OAuth app access restrictions are enabled by default.",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "g-or-request",
+      "url": "https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/about-oauth-app-access-restrictions",
+      "quote": "Users can request owner approval for OAuth apps they'd like to use",
+      "result": "matched"
+    },
+    {
+      "slug": "github",
+      "claimId": "c-composio-callback",
+      "url": "https://docs.composio.dev/docs/custom-auth-configs",
+      "quote": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-restricted-list",
+      "url": "https://developers.google.com/workspace/gmail/api/auth/scopes",
+      "quote": "These scopes provide wide access to Google user data and require restricted scope OAuth App Verification.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-sensitive-list",
+      "url": "https://developers.google.com/workspace/gmail/api/auth/scopes",
+      "quote": "They require additional OAuth App Verification.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-restricted-weeks",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification",
+      "quote": "the restricted scopes verification process can potentially take several weeks to complete.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-casa",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification",
+      "quote": "must go through a security assessment from Google-empanelled security assessors.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-casa-trigger",
+      "url": "https://developers.google.com/workspace/gmail/api/auth/scopes",
+      "quote": "If you store restricted scope data on servers (or transmit), then you must go through a security assessment.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-annual",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification",
+      "quote": "complete a security assessment at least every 12 months after your assessor's Letter of Assessment (LOA) approval date.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-old-cost",
+      "url": "https://www.nylas.com/blog/google-oauth-app-verification/",
+      "quote": "Google references a range from $15,000-$75,000.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-sensitive-10d",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification",
+      "quote": "The sensitive scope verification process can take up to 10 days to complete.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-test-100",
+      "url": "https://support.google.com/cloud/answer/15549945",
+      "quote": "limited to up to 100 test users listed in the OAuth consent screen.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-test-7day",
+      "url": "https://developers.google.com/identity/protocols/oauth2",
+      "quote": "and a publishing status of \"Testing\" is issued a refresh token expiring in 7 days",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-100-tokens",
+      "url": "https://developers.google.com/identity/protocols/oauth2",
+      "quote": "There is currently a limit of 100 refresh tokens per Google Account per OAuth 2.0 client ID.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-unverified-100",
+      "url": "https://support.google.com/cloud/answer/7454865",
+      "quote": "your app will be limited to 100 new users until it is verified.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-internal",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification",
+      "quote": "This means the app is used only by people in your Google Workspace or Cloud Identity organization.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-domain",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification",
+      "quote": "Verify ownership of your project's authorized domains within the Google Search Console.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-homepage",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification",
+      "quote": "Your home page must be publicly accessible, and not just accessible to your site's logged-in users.",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-privacy",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification",
+      "quote": "The privacy policy must be visible to users, hosted within the same domain as your application's home page,",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-video",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/sensitive-scope-verification",
+      "quote": "Prepare a video that fully demonstrates how a user initiates and grants access to the requested scopes",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-justify-narrow",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification",
+      "quote": "why more limited scopes aren't sufficient",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-limited-use-ai",
+      "url": "https://developers.google.com/workspace/workspace-api-user-data-developer-policy",
+      "quote": "Transferring, selling, or using user data to create, train, or improve a machine learning or artificial intelligence model",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-human-read",
+      "url": "https://developers.google.com/workspace/workspace-api-user-data-developer-policy",
+      "quote": "Do not allow humans to read user data, unless:",
+      "result": "matched"
+    },
+    {
+      "slug": "gmail",
+      "claimId": "c-composio-callback",
+      "url": "https://docs.composio.dev/docs/custom-auth-configs",
+      "quote": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-pv-nov2020",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+      "quote": "Beginning November 2020, if risk-based step-up consent is enabled, users can't consent to most newly registered multitenant apps that aren't publisher verified.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-pv-minutes",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+      "quote": "Developers who have already met these requirements can be verified in minutes.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-pv-cpp",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+      "quote": "The CPP account must be the partner global account (PGA) for the developer's organization.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-pv-work",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+      "quote": "Apps that are registered by using a Microsoft account can't be publisher verified.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-pv-domain",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+      "quote": "The domain of the email address that's used during CPP account verification must either match the publisher domain that's set for the app or be a DNS-verified custom domain that's added to the Microsoft Entra tenant.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-pv-onms",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+      "quote": "the app's publisher domain can't be *.onmicrosoft.com to be publisher verified",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-pv-mfa",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+      "quote": "The user who initiates verification must sign in by using Microsoft Entra multifactor authentication.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-pv-roles",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+      "quote": "The user who initiates the verification must have one of the required roles in both Microsoft Entra ID and Partner Center.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-pv-free",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/publisher-verification-overview",
+      "quote": "Microsoft doesn't charge developers for publisher verification. No license is required to become a verified publisher.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-rg-prereq",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+      "quote": "The Azure account must be at least an Application Developer.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-rg-steps",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+      "quote": "Browse to Entra ID > App registrations and select New registration.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-rg-multi",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+      "quote": "For multitenant apps when you want users in any Microsoft Entra tenant to be able to use your application.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-rg-single",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+      "quote": "We recommend Single tenant only - <your tenant> for most applications.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-rg-move",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app",
+      "quote": "Once created, you can't move the application object between different tenants.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-pc-delegated",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview",
+      "quote": "The application isn't able to access anything the signed in user couldn't access.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-pc-admin",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/permissions-consent-overview",
+      "quote": "application permissions and many high-privilege delegated permissions can only be consented to by an administrator.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-rt-90",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/refresh-tokens",
+      "quote": "90 days for all other scenarios.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-rt-replace",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/refresh-tokens",
+      "quote": "Refresh tokens replace themselves with a fresh token upon every use.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "m-rt-revoke",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/refresh-tokens",
+      "quote": "they can be revoked by the sign-in service at any time before their expiration.",
+      "result": "matched"
+    },
+    {
+      "slug": "outlook",
+      "claimId": "c-composio-callback",
+      "url": "https://docs.composio.dev/docs/custom-auth-configs",
+      "quote": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-rl-tier",
+      "url": "https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps",
+      "quote": "are changing from `Tier 3` to `Tier 1` for commercially distributed apps that are not approved for the Slack Marketplace",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-rl-1rpm",
+      "url": "https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps",
+      "quote": "will be limited to 1 request per minute, unless they are approved for the Slack Marketplace",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-rl-15",
+      "url": "https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps",
+      "quote": "The maximum and default for the `limit` parameter has been reduced to 15 objects.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-rl-mk",
+      "url": "https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps",
+      "quote": "This change will not impact Marketplace apps.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-rl-internal",
+      "url": "https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps",
+      "quote": "Internal customer-built applications are not impacted by these changes.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-rl-new",
+      "url": "https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps",
+      "quote": "The updated terms are effective immediately for applications created on or after May 29, 2025.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-rl-existing",
+      "url": "https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps",
+      "quote": "These rate limits will not impact existing installations of these apps.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mk-10days",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide",
+      "quote": "the preliminary part of the review takes up to 10 business days to receive feedback",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mk-10weeks",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide",
+      "quote": "the functional review takes up to 10 weeks for new submissions and 6 weeks for published apps resubmitting changes",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mk-6weeks",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide",
+      "quote": "the functional review takes up to 10 weeks for new submissions and 6 weeks for published apps resubmitting changes",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mk-10ws",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide",
+      "quote": "Your app has been installed on 10 or more active workspaces",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mk-active",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide",
+      "quote": "An active workspace is a workspace that has been used in the past 28 days.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mk-video",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide",
+      "quote": "A short video demo is required for new submissions and for updates that add functionality or scopes.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mk-creds",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide",
+      "quote": "provide us with test account credentials needed to access your service",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mk-support",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide",
+      "quote": "You are prepared to maintain your app and to provide good levels of support to the customers who choose to install it.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mk-feedback",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide",
+      "quote": "You’ll receive our feedback from the review within the submission flow in your app settings",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mk-locked",
+      "url": "https://docs.slack.dev/slack-marketplace/slack-marketplace-review-guide",
+      "quote": "Once your app is published in the Slack Marketplace, the live version of your app is locked.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-di-default",
+      "url": "https://docs.slack.dev/distribution",
+      "quote": "By default, a newly built Slack app can only be installed in its associated workspace as mentioned above.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-di-ssl",
+      "url": "https://docs.slack.dev/distribution",
+      "quote": "Your app must support SSL for all of the following URLs:",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-di-commercial",
+      "url": "https://docs.slack.dev/distribution",
+      "quote": "apps intended for commercial distribution should be submitted and approved for listing in the Slack Marketplace.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-tr-never",
+      "url": "https://docs.slack.dev/authentication/using-token-rotation",
+      "quote": "Without token rotation, the access token never expires.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-tr-12h",
+      "url": "https://docs.slack.dev/authentication/using-token-rotation",
+      "quote": "With token rotation, it expires every 12 hours.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-tr-once",
+      "url": "https://docs.slack.dev/authentication/using-token-rotation",
+      "quote": "Refresh tokens are designed to be used once.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-tr-off",
+      "url": "https://docs.slack.dev/authentication/using-token-rotation",
+      "quote": "Token rotation may not be turned off once it's turned on",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mf-what",
+      "url": "https://docs.slack.dev/app-manifests/configuring-apps-with-app-manifests",
+      "quote": "Manifests are YAML or JSON-formatted configurations bundles for Slack apps.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "s-mf-ui",
+      "url": "https://docs.slack.dev/app-manifests/configuring-apps-with-app-manifests",
+      "quote": "apps.manifest.create is used to create apps from JSON manifests.",
+      "result": "matched"
+    },
+    {
+      "slug": "slack",
+      "claimId": "c-composio-callback",
+      "url": "https://docs.composio.dev/docs/custom-auth-configs",
+      "quote": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-dev-5",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "Up to 5 authenticated Spotify users can use an app that is in development mode",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-dev-allow",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "Each Spotify user who installs your app will need to be added to your app's allowlist before they can use it.",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-dev-premium",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "The app owner must have a Spotify Premium account for apps in development mode to function.",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-dev-403",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "API requests with an access token associated to that user and app will receive a 403 status code error.",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-ext-org",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "Please note that as of May 15th 2025, Spotify only accepts applications from organizations (not individuals).",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-ext-entity",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "Established Business Entity (legally registered business or organisation)",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-ext-launched",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "Operating an active, and Launched Service",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-ext-250k",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "Maintaining a minimum of active users (at least 250k MAUs)",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-ext-email",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "Application must be sent through a company email",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-ext-move",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "you can ask Spotify to move your app from development mode into extended quota mode.",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-ext-6w",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "This review process can take up to six weeks.",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-ext-rate",
+      "url": "https://developer.spotify.com/documentation/web-api/concepts/quota-modes",
+      "quote": "Extended quota mode apps also have access to a higher rate limit than development mode apps do.",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-mg-premium",
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide",
+      "quote": "All Development Mode apps require the app owner to have an active Spotify Premium subscription.",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-mg-25",
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide",
+      "quote": "As of July 2026, the Client IDs per developer limit has been increased to 25.",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-mg-grandfather",
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide",
+      "quote": "Existing apps are grandfathered: If you already have multiple Client IDs or more than 5 users, you will retain them.",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-mg-batch",
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide",
+      "quote": "The following batch endpoints are no longer available. Fetch items individually instead.",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "p-mg-rename",
+      "url": "https://developer.spotify.com/documentation/web-api/tutorials/february-2026-migration-guide",
+      "quote": "The playlist track management endpoints have been renamed from `/tracks` to `/items`:",
+      "result": "matched"
+    },
+    {
+      "slug": "spotify",
+      "claimId": "c-composio-callback",
+      "url": "https://docs.composio.dev/docs/custom-auth-configs",
+      "quote": "https://backend.composio.dev/api/v3/toolkits/auth/callback",
+      "result": "matched"
+    }
+  ]
+}

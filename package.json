@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "validate": "tsx scripts/validate.ts",
-    "gen": "tsx --env-file=.env.local --conditions=react-server scripts/gen.ts"
+    "gen": "tsx --env-file=.env.local --conditions=react-server scripts/gen.ts",
+    "verify:quotes": "tsx scripts/verify-quotes.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

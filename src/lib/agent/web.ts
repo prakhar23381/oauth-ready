@@ -48,7 +48,7 @@ export async function safeFetch(url: string, opts: { timeoutMs?: number; maxByte
     const res = await fetch(current, {
       redirect: "manual",
       signal: AbortSignal.timeout(opts.timeoutMs ?? 7000),
-      headers: { "user-agent": "OAuthReadyBot/0.1 (research agent)", accept: opts.accept ?? "text/html,application/json;q=0.9,*/*;q=0.5" },
+      headers: { "user-agent": "OAuthReadyBot/0.1 (research agent)", accept: opts.accept ?? "text/html,application/json;q=0.9,*/*;q=0.5", "accept-language": "en-US,en;q=0.9" },
     });
     const location = res.headers.get("location") ?? undefined;
     if (res.status >= 300 && res.status < 400 && location && hop < max) {
