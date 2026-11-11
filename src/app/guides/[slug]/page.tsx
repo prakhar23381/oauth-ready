@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ArrowUpRight, Check, ChevronRight, CircleCheck, Info, Minus, OctagonX, TriangleAlert } from "lucide-react";
+import { ArrowUpRight, Check, CircleCheck, Info, Minus, OctagonX, TriangleAlert } from "lucide-react";
 import { getGuide, getOverlay } from "@/lib/guides";
 import { defaultPath, formatRange } from "@/lib/schema/guide";
 import { STATUS_META } from "@/lib/ui-meta";
@@ -9,6 +9,7 @@ import { PathTabs, StatRow, TierChip } from "@/components/guide/path-tabs";
 import { Toc } from "@/components/guide/toc";
 import { Tip } from "@/components/tip";
 import { Chip } from "@/components/chip";
+import { Disclosure } from "@/components/disclosure";
 import { RequirementsChecklist } from "@/components/guide/requirements";
 import { ShareBar } from "@/components/guide/share-bar";
 import { CopyButton } from "@/components/guide/copy-button";
@@ -31,21 +32,6 @@ function Section({ id, title, tip, children }: { id: string; title: string; tip?
       </h2>
       <div className="mt-4">{children}</div>
     </section>
-  );
-}
-
-/** A row that shows only its title until opened. Keeps secondary detail off the page by default. */
-function Disclosure({ icon, title, aside, children }: { icon?: React.ReactNode; title: React.ReactNode; aside?: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <details className="group">
-      <summary className="flex cursor-pointer list-none items-center gap-3 py-3 hover:bg-accent/50">
-        {icon}
-        <span className="min-w-0 flex-1">{title}</span>
-        {aside}
-        <ChevronRight className="size-4 shrink-0 text-subtle-foreground transition-transform group-open:rotate-90" />
-      </summary>
-      <div className="pb-5">{children}</div>
-    </details>
   );
 }
 

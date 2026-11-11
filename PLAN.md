@@ -28,7 +28,7 @@
 | P2.5 | Apply DESIGN.md to the existing UI (fonts, tokens, square, no bold/eyebrows) | 0:30 | ✅ |
 | P3 | Live research agent + streaming generation UI | 2:00 | ✅ (Strava 83s, Pipedrive 63s, OpenWeatherMap 40s; nonsense query refused) |
 | P4 | Library generation (8–10 apps) + home/library page | 0:45 | ✅ 5 guides: Gmail T3, Slack T3, Outlook T2, GitHub T1, Spotify T4 (cut line used: 5 instead of 8–10) |
-| P5 | Verification: hands-on setup attempts + source checks → verification log | 1:15 | ☐ (can overlap P4) |
+| P5 | Verification: hands-on setup attempts + source checks → verification log | 1:15 | ◐ pages built, quote check 105/105; waiting on the user's hands-on notes (GitHub, Slack, Google Cloud, Spotify) |
 | P6 | Deploy, share features, polish, guardrails | 0:45 | ☐ |
 | P7 | README, demo rehearsal with unfamiliar apps, submit | 0:30 | ☐ |
 
@@ -407,6 +407,12 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 - Finding from the first run: 10 Gmail quotes failed because Google redirected the fetcher to a machine-translated Arabic page (`?hl=ar`). Fixed by sending `accept-language: en-US`. Worth a line in the verification log and README.
 - Not researched (candidates if time allows): Notion (public integration requirements were not on the page read), X/Twitter, Dropbox, Shopify.
 - The user asked to stop spending Groq/Tavily quota on test runs; keep it for the deployed demo.
+
+## 14c. Verification (P5)
+- `/verification` reads `data/verification/findings.json` (corrections, unverified items, limitations, agent test runs), `quote-check.json` (from `pnpm verify:quotes`) and per-app overlays `data/verification/<slug>.json` (schema `VerificationOverlay`).
+- **When the user sends hands-on notes:** write one overlay per app with `attempts[]` and `claimChecks[]` (use real claim ids from the guide; `method: "hands_on"`, `result: confirmed|corrected|unverifiable`). Confirmed claims show as "Hands-on verified" in the guide; corrected ones get a conflict note. Fix the guide JSON where the guide was wrong, and add a line to findings.json.
+- Checklist given to the user: GitHub (instant registration? number of callback URLs? token-expiry setting?), Slack (does the manifest validate? distribution checklist items? rate-limit notice?), Google Cloud (test-user limit text, gmail.readonly restricted warning, publish dialog text), Spotify (Premium requirement message, user limit, extended quota text).
+- `/about` explains the agent stages, evidence grades, tiers and limits.
 
 ## 14. Implementation notes (for context recovery)
 - Schema: `src/lib/schema/guide.ts` (Zod 4). Validate library: `pnpm validate` (schema + claim-id references).

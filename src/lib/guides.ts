@@ -45,8 +45,26 @@ export async function getOverlay(slug: string): Promise<VerificationOverlay | nu
 }
 
 export async function listOverlays(): Promise<VerificationOverlay[]> {
-  return readJsonDir("verification", (x) => VerificationOverlay.parse(x));
+  // The folder also holds quote-check.json and findings.json, which are not overlays.
+  const all = await readJsonDir("verification", (x) => VerificationOverlay.safeParse(x));
+  return all.filter((r) => r.success).map((r) => r.data!);
 }
+
+export type QuoteCheck = { summary: { checkedAt: string; total: number; matched: number; notFound: number; unreachable: number }; rows: { slug: string; claimId: string; url: string; quote: string; result: "matched" | "not_found" | "unreachable" }[] };
+export type Findings = {
+  updatedAt: string;
+  findings: { kind: "corrected" | "unverifiable" | "limitation" | "confirmed"; scope: string; title: string; detail: string; source: string | null }[];
+  agentRuns: { app: string; seconds: number; facts: number; quotesMatched: number; note: string }[];
+};
+async function readVerification<T>(file: string): Promise<T | null> {
+  try {
+    return JSON.parse(await fs.readFile(path.join(DATA_DIR, "verification", file), "utf8")) as T;
+  } catch {
+    return null;
+  }
+}
+export const getQuoteCheck = () => readVerification<QuoteCheck>("quote-check.json");
+export const getFindings = () => readVerification<Findings>("findings.json");
 
 /** Library first (curated), then live-generated store. */
 export async function getGuide(slug: string): Promise<Guide | null> {
