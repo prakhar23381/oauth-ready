@@ -9,10 +9,10 @@ import { Guide } from "@/lib/schema/guide";
  * Storage for live-generated guides.
  * Upstash Redis when configured (production); local .data/ files otherwise (dev).
  */
-const redis =
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-    ? new Redis({ url: process.env.UPSTASH_REDIS_REST_URL, token: process.env.UPSTASH_REDIS_REST_TOKEN })
-    : null;
+// Vercel's Upstash integration names these KV_REST_API_*; a direct Upstash database uses UPSTASH_REDIS_REST_*.
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
+const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
 
 // Serverless file systems are read-only apart from the temp dir. Without Redis, generated guides
 // on a deployment last only as long as the instance, so Redis is required for durable share links.
