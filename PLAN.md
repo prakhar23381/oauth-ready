@@ -12,7 +12,7 @@
 
 ## 0. Status board (keep this current)
 
-**Current phase:** P7 — README, rehearsal, submit (P0–P4 and P6 done; P5 hands-on checks deferred by the user). Live: https://oauth-ready-lake.vercel.app
+**Current phase:** Submission. Everything built and deployed; remaining: make the repo public (user to confirm), optional hands-on checks (P5), submit links. Live: https://oauth-ready-lake.vercel.app
 
 **Blockers / env facts (2026-11-11):**
 - LLM keys: the user has no paid key. They create free keys: **GROQ_API_KEY** (console.groq.com), **TAVILY_API_KEY** (tavily.com), optionally **MISTRAL_API_KEY** (console.mistral.ai, phone verification) and **GOOGLE_GENERATIVE_AI_API_KEY** (aistudio.google.com). These go in `.env.local`, later in Vercel env.
@@ -30,7 +30,7 @@
 | P4 | Library generation (8–10 apps) + home/library page | 0:45 | ✅ 5 guides: Gmail T3, Slack T3, Outlook T2, GitHub T1, Spotify T4 (cut line used: 5 instead of 8–10) |
 | P5 | Verification: hands-on setup attempts + source checks → verification log | 1:15 | ◐ pages built, quote check 105/105; waiting on the user's hands-on notes (GitHub, Slack, Google Cloud, Spotify) |
 | P6 | Deploy, share features, polish, guardrails | 0:45 | ✅ https://oauth-ready-lake.vercel.app |
-| P7 | README, demo rehearsal with unfamiliar apps, submit | 0:30 | ☐ |
+| P7 | README, demo rehearsal with unfamiliar apps, submit | 0:30 | ◐ README done, rehearsal done (Xero by URL 77s, library lookups by domain), credential sweep clean; repo still private |
 
 **Total ≈ 7.5 h.** Cut lines are in §11 if we fall behind.
 
@@ -422,6 +422,11 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 - Limits: 6 live runs per IP per hour, 40 per day (env `GENERATE_LIMIT_PER_IP`, `GENERATE_LIMIT_PER_DAY`). On Blob, each run writes a marker under `runs/<day>/`; counted by prefix.
 - Blob CLI needs `env -u VERCEL_OIDC_TOKEN vercel blob ... --rw-token <token>` because .env.local holds an OIDC token without a store ID.
 - Verified on production 2026-11-13: all pages 200, unknown slug 404, Calendly generated in 32s and persisted (share link 200, cached repeat in 0.6s), Webflow through the UI in 53s with live streaming progress.
+
+## 14e. P7 notes
+- README.md is written for the Composio reviewers (setup, decisions, verification, limitations).
+- Production fixes after rehearsal: fact ids in estimate notes are converted to source hosts (pipeline) and cleaned at display (`cleanBasis` in `src/lib/schema/guide.ts`, must stay outside client modules: importing it from a "use client" file into a server page caused a 500); prompt now requires headline, risk and ranges to agree and bans "0 days".
+- Do not run `pnpm build` while `pnpm dev` is running: it overwrites `.next` and the dev server returns 500 until restarted with a clean `.next`.
 
 ## 14. Implementation notes (for context recovery)
 - Schema: `src/lib/schema/guide.ts` (Zod 4). Validate library: `pnpm validate` (schema + claim-id references).
