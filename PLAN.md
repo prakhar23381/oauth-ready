@@ -12,7 +12,7 @@
 
 ## 0. Status board (keep this current)
 
-**Current phase:** P5 — verification (P0–P4 done; repo: github.com/prakhar23381/oauth-ready, private)
+**Current phase:** P7 — README, rehearsal, submit (P0–P4 and P6 done; P5 hands-on checks deferred by the user). Live: https://oauth-ready-lake.vercel.app
 
 **Blockers / env facts (2026-11-11):**
 - LLM keys: the user has no paid key. They create free keys: **GROQ_API_KEY** (console.groq.com), **TAVILY_API_KEY** (tavily.com), optionally **MISTRAL_API_KEY** (console.mistral.ai, phone verification) and **GOOGLE_GENERATIVE_AI_API_KEY** (aistudio.google.com). These go in `.env.local`, later in Vercel env.
@@ -29,7 +29,7 @@
 | P3 | Live research agent + streaming generation UI | 2:00 | ✅ (Strava 83s, Pipedrive 63s, OpenWeatherMap 40s; nonsense query refused) |
 | P4 | Library generation (8–10 apps) + home/library page | 0:45 | ✅ 5 guides: Gmail T3, Slack T3, Outlook T2, GitHub T1, Spotify T4 (cut line used: 5 instead of 8–10) |
 | P5 | Verification: hands-on setup attempts + source checks → verification log | 1:15 | ◐ pages built, quote check 105/105; waiting on the user's hands-on notes (GitHub, Slack, Google Cloud, Spotify) |
-| P6 | Deploy, share features, polish, guardrails | 0:45 | ☐ |
+| P6 | Deploy, share features, polish, guardrails | 0:45 | ✅ https://oauth-ready-lake.vercel.app |
 | P7 | README, demo rehearsal with unfamiliar apps, submit | 0:30 | ☐ |
 
 **Total ≈ 7.5 h.** Cut lines are in §11 if we fall behind.
@@ -390,7 +390,7 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 ## 13. Commands and paths (fill in as created)
 - Dev: `pnpm dev` · Library: `pnpm gen:library` · Typecheck: `pnpm tsc --noEmit`
 - Env: `.env.local` (never committed); template `.env.example`
-- Live URL: _TBD_ · Repo URL: _TBD_
+- Live URL: https://oauth-ready-lake.vercel.app · Repo URL: https://github.com/prakhar23381/oauth-ready (private until submission)
 
 ## 14a. The live agent as built (P3)
 - **No SDK.** `src/lib/agent/llm.ts` is a small OpenAI-compatible JSON client. Each model is a "lane" with its own token bucket; calls pick the best lane with room, wait when none has, and move lanes on a 429. Lanes come from env keys: Groq (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b`), plus Mistral and Gemini if their keys are set. (D2 superseded: the Vercel AI SDK was removed.)
@@ -413,6 +413,15 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 - **When the user sends hands-on notes:** write one overlay per app with `attempts[]` and `claimChecks[]` (use real claim ids from the guide; `method: "hands_on"`, `result: confirmed|corrected|unverifiable`). Confirmed claims show as "Hands-on verified" in the guide; corrected ones get a conflict note. Fix the guide JSON where the guide was wrong, and add a line to findings.json.
 - Checklist given to the user: GitHub (instant registration? number of callback URLs? token-expiry setting?), Slack (does the manifest validate? distribution checklist items? rate-limit notice?), Google Cloud (test-user limit text, gmail.readonly restricted warning, publish dialog text), Spotify (Premium requirement message, user limit, extended quota text).
 - `/about` explains the agent stages, evidence grades, tiers and limits.
+
+## 14d. Deployment (P6)
+- Vercel project `oauth-ready` (team prakhar23381-iiitdacins-projects), production alias **https://oauth-ready-lake.vercel.app**. Deploy: `vercel deploy --prod --yes`.
+- **PATH note:** in some sessions `vercel`/`pnpm` are not on PATH. Use `export PATH=~/.nvm/versions/node/v22.14.0/bin:$PATH`.
+- Env on Vercel (production): `GROQ_API_KEY`, `TAVILY_API_KEY`, `BLOB_READ_WRITE_TOKEN` (private Blob store `oauth-ready-guides`, linked to production and preview only, so local dev keeps using `.data/`).
+- Storage order in `src/lib/store.ts`: Redis (if `UPSTASH_REDIS_REST_*` or `KV_REST_API_*`) → Blob → files. Upstash was not added: it needs the user to accept Marketplace terms in a browser (`vercel integration add upstash/upstash-kv`).
+- Limits: 6 live runs per IP per hour, 40 per day (env `GENERATE_LIMIT_PER_IP`, `GENERATE_LIMIT_PER_DAY`). On Blob, each run writes a marker under `runs/<day>/`; counted by prefix.
+- Blob CLI needs `env -u VERCEL_OIDC_TOKEN vercel blob ... --rw-token <token>` because .env.local holds an OIDC token without a store ID.
+- Verified on production 2026-11-13: all pages 200, unknown slug 404, Calendly generated in 32s and persisted (share link 200, cached repeat in 0.6s), Webflow through the UI in 53s with live streaming progress.
 
 ## 14. Implementation notes (for context recovery)
 - Schema: `src/lib/schema/guide.ts` (Zod 4). Validate library: `pnpm validate` (schema + claim-id references).
