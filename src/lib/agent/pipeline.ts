@@ -220,7 +220,21 @@ export async function researchGuide(query: string, emit: Emit): Promise<Generate
   });
   const claimIds = new Set(claims.map((c) => c.id));
   const refs = (ids: string[]) => [...new Set(ids.map((i) => i.trim().toLowerCase()).filter((i) => claimIds.has(i)))];
-  const fix = (r: Range): Range => (r.min > r.max ? { ...r, min: r.max, max: r.min } : r);
+  // Fact ids are internal. In text shown to readers, replace them with the source's host.
+  const factHost = new Map(facts.map((f) => [f.id, f.page.host]));
+  const REF = /\b(?:facts?\s+)?F\d+(?:\s*(?:,|and|&)\s*F\d+)*\b/gi;
+  const readable = (s: string) => {
+    const onlyRefs = s.replace(REF, "").replace(/[\s.,;()]/g, "") === "";
+    const out = s.replace(REF, (m) => {
+      const hosts = [...new Set((m.match(/F\d+/gi) ?? []).map((id) => factHost.get(id.toUpperCase())).filter(Boolean))];
+      return hosts.length ? hosts.join(" and ") : "cited sources";
+    });
+    return onlyRefs ? `Source: ${out.trim()}` : out;
+  };
+  const fix = (r: Range): Range => {
+    const out = r.min > r.max ? { ...r, min: r.max, max: r.min } : r;
+    return { ...out, basis: readable(out.basis) };
+  };
 
   const pathIds = new Set<string>();
   let hasDefault = false;

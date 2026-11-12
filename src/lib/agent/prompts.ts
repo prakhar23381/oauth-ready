@@ -122,6 +122,9 @@ Reply with one JSON object:
 Rules:
 - Use only the facts provided for provider-specific statements. General OAuth practice may be used for step wording. Never invent limits, durations, prices or URLs.
 - At least one step in a path with a review should have owner "agent" where drafting or preparation is involved (scope selection, listing or justification text, review submission notes).
+- The headline, biggestRisk and the default path's ranges must agree. If the risk mentions a longer duration than the production range, widen the range or explain the difference.
+- Never write "0 days" or similar. Write "no provider review" or "immediately" instead.
+- In "basis", cite fact ids only (for example "F3, F7"); they are converted to source names.
 - Durations must come from the facts. Where the facts give none, use a cautious range and say so in "basis".
 - Facts graded "community" or "unverified" are weaker. Prefer "official" facts, and name the grade in "basis" when relying on weaker ones.
 - If the provider offers no OAuth for third-party apps, write one path describing the authentication method that the facts do support.`;

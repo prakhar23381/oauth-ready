@@ -35,6 +35,9 @@ function TierChipStatic({ tier }: { tier: 1 | 2 | 3 | 4 }) {
 }
 
 /** Three small numbers. How each was estimated is in its tip, never inline. */
+/** Older generated guides may contain raw fact ids in an estimate's basis. */
+const cleanBasis = (s: string) => s.replace(/\b(?:facts?\s+)?F\d+(?:\s*(?:,|and|&)\s*F\d+)*\b/gi, "cited sources").replace(/^cited sources$/, "Source: cited sources");
+
 export function StatRow({ path, vertical = false }: { path: Path; vertical?: boolean }) {
   const cells = [
     { label: "First test connection", r: path.timeToFirstLogin, value: formatRange(path.timeToFirstLogin) },
@@ -48,7 +51,7 @@ export function StatRow({ path, vertical = false }: { path: Path; vertical?: boo
           <div key={c.label} className="flex items-baseline justify-between gap-4 py-3">
             <dt className="text-sm text-muted-foreground">
               {c.label}
-              <Tip label={`Basis for ${c.label.toLowerCase()}`} content={<><span className="text-muted-foreground">Basis for this estimate.</span> {c.r.basis}</>} />
+              <Tip label={`Basis for ${c.label.toLowerCase()}`} content={<><span className="text-muted-foreground">Basis for this estimate.</span> {cleanBasis(c.r.basis)}</>} />
             </dt>
             <dd className="text-[17px] tabular-nums">{c.value}</dd>
           </div>
@@ -61,7 +64,7 @@ export function StatRow({ path, vertical = false }: { path: Path; vertical?: boo
         <div key={c.label} className="px-3 py-3 first:pl-0 sm:px-4">
           <dt className="text-xs text-muted-foreground">
             {c.label}
-            <Tip label={`Basis for ${c.label.toLowerCase()}`} content={<><span className="text-muted-foreground">Basis for this estimate.</span> {c.r.basis}</>} />
+            <Tip label={`Basis for ${c.label.toLowerCase()}`} content={<><span className="text-muted-foreground">Basis for this estimate.</span> {cleanBasis(c.r.basis)}</>} />
           </dt>
           <dd className="mt-0.5 text-[17px] tabular-nums">{c.value}</dd>
         </div>
