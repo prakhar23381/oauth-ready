@@ -254,3 +254,7 @@ export function rangeMinutes(r: Range) {
 export function defaultPath(g: Guide): Path {
   return g.paths.find((p) => p.isDefault) ?? g.paths[0];
 }
+
+/** Older generated guides may contain raw fact ids (F12) in an estimate's basis. */
+export const cleanBasis = (s: string) =>
+  s.replace(/\b(?:facts?\s+)?F\d+(?:\s*(?:,|and|&)\s*F\d+)*\b/gi, "cited sources").replace(/^cited sources$/, "Source: cited sources");
