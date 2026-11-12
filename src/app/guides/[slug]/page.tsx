@@ -5,7 +5,7 @@ import { getGuide, getOverlay } from "@/lib/guides";
 import { defaultPath, formatRange } from "@/lib/schema/guide";
 import { STATUS_META } from "@/lib/ui-meta";
 import { ClaimDetail, ClaimRefs, ClaimsProvider, StatusChip } from "@/components/guide/claims";
-import { PathTabs, StatRow, TierChip } from "@/components/guide/path-tabs";
+import { PathTabs, StatRow, TierChip, cleanBasis } from "@/components/guide/path-tabs";
 import { Toc } from "@/components/guide/toc";
 import { Tip } from "@/components/tip";
 import { Chip } from "@/components/chip";
@@ -110,7 +110,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
               <p className="text-[44px] leading-[1.05] tracking-[-0.025em] tabular-nums sm:text-[56px]">{formatRange(p.timeToProduction)}</p>
               <p className="mt-1 text-muted-foreground">
                 Estimated time to production
-                <Tip label="About this estimate" content={<>Time until any end user can connect, for the most common path: {p.name.toLowerCase()}. <span className="text-muted-foreground">{p.timeToProduction.basis}</span></>} />
+                <Tip label="About this estimate" content={<>Time until any end user can connect, for the most common path: {p.name.toLowerCase()}. <span className="text-muted-foreground">{cleanBasis(p.timeToProduction.basis)}</span></>} />
               </p>
               <p className="mt-5 text-[17px] leading-snug">
                 {g.verdict.headline}

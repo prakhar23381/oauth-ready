@@ -36,7 +36,7 @@ function TierChipStatic({ tier }: { tier: 1 | 2 | 3 | 4 }) {
 
 /** Three small numbers. How each was estimated is in its tip, never inline. */
 /** Older generated guides may contain raw fact ids in an estimate's basis. */
-const cleanBasis = (s: string) => s.replace(/\b(?:facts?\s+)?F\d+(?:\s*(?:,|and|&)\s*F\d+)*\b/gi, "cited sources").replace(/^cited sources$/, "Source: cited sources");
+export const cleanBasis = (s: string) => s.replace(/\b(?:facts?\s+)?F\d+(?:\s*(?:,|and|&)\s*F\d+)*\b/gi, "cited sources").replace(/^cited sources$/, "Source: cited sources");
 
 export function StatRow({ path, vertical = false }: { path: Path; vertical?: boolean }) {
   const cells = [

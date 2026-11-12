@@ -23,7 +23,8 @@ for (const f of readdirSync(dir("guides")).filter((f) => f.endsWith(".json"))) {
   console.log(`✓ ${f}: ${g.paths.length} paths, ${g.claims.length} claims${unused.length ? ` (unreferenced: ${unused.join(", ")})` : ""}`);
 }
 try {
-  for (const f of readdirSync(dir("verification")).filter((f) => f.endsWith(".json"))) {
+  // findings.json and quote-check.json are logs, not per-app overlays.
+  for (const f of readdirSync(dir("verification")).filter((f) => f.endsWith(".json") && !["findings.json", "quote-check.json"].includes(f))) {
     const r = VerificationOverlay.safeParse(JSON.parse(readFileSync(path.join(dir("verification"), f), "utf8")));
     if (!r.success) { failed = true; console.error(`✗ overlay ${f}`, r.error.issues.slice(0, 5)); } else console.log(`✓ overlay ${f}`);
   }
