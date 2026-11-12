@@ -1,5 +1,5 @@
 import { getLibraryGuide, listLibraryGuides } from "@/lib/guides";
-import { getGeneratedGuide, saveGeneratedGuide } from "@/lib/store";
+import { checkGenerateLimit, getGeneratedGuide, saveGeneratedGuide } from "@/lib/store";
 import { normalizeAppName } from "@/lib/composio-directory";
 import { researchGuide, slugify } from "@/lib/agent/pipeline";
 import type { AgentEvent } from "@/lib/agent/events";
@@ -35,6 +35,9 @@ export async function POST(req: Request) {
           const existing = await getGeneratedGuide(guess);
           if (existing) return emit({ type: "done", slug: existing.slug, cached: true, ms: 0 });
         }
+        const ip = (req.headers.get("x-forwarded-for") ?? "local").split(",")[0].trim();
+        const refused = await checkGenerateLimit(ip);
+        if (refused) return emit({ type: "error", message: refused });
         const { guide } = await researchGuide(query, emit);
         if (await getLibraryGuide(guide.slug)) return emit({ type: "done", slug: guide.slug, cached: true, ms: Date.now() - started });
         await saveGeneratedGuide(guide);

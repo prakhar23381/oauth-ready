@@ -10,6 +10,8 @@ import "./globals.css";
 const jetbrainsMono = JetBrains_Mono({ variable: "--font-jetbrains-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000"),
+  openGraph: { siteName: "OAuth Ready", type: "website" },
   title: "OAuth Ready: how long until your users can connect?",
   description:
     "Evidence-graded guides for creating a provider OAuth app and getting it approved: time, effort, review, blockers, and what an agent can do for you.",
