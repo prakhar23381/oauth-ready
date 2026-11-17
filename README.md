@@ -32,7 +32,7 @@ Researching this showed three things that shaped the product:
 | **Steps are tagged by owner:** the agent can prepare it, you must do it, or you are waiting on the provider. The agent drafts manifests, CLI commands, form values and review justifications. | This answers "what can an agent do for me". |
 | **Free-tier models only** (Groq `gpt-oss-120b`, `gpt-oss-20b`, `qwen3.8-27b`) with Tavily search. A small client spreads calls across models by token budget and waits briefly on rate limits. | No paid API key. Mistral or Gemini keys are used automatically if set. |
 | **Library guides were researched in the development session** with the same schema and evidence rules. Live generation runs on the deployed app. | Higher-quality library guides, and the free quota is saved for live use. |
-| **Design follows Composio's [Brand Hub](https://brand.composio.dev)** ([DESIGN.md](DESIGN.md)). Answer first, details on demand. | It should feel at home next to Composio's docs. It is not presented as a Composio product. |
+| **Design follows Composio's [Brand Hub](https://brand.composio.dev)** ([DESIGN.md](DESIGN.md)). Answer first, details on demand. | It uses Composio's published design tokens. It is not a Composio product. |
 
 ## How the agent works
 

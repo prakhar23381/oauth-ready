@@ -97,7 +97,7 @@ components:
 
 # OAuth Ready: Design System
 
-> **What this is.** OAuth Ready is a take-home project *for* Composio. It uses Composio's **visual language** (tokens, type, surfaces, tone) so it feels at home next to Composio's docs and dashboard.
+> **What this is.** OAuth Ready is an independent project. It uses Composio's **visual language** (tokens, type, surfaces, tone) so it feels at home next to Composio's docs and dashboard.
 > It is **not** an official Composio product. **Never use the Composio logo, wordmark or brand name as our identity.** Our wordmark is "OAuth Ready" set in Geist 500.
 
 ## 1. Where this comes from (evidence)

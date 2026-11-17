@@ -1,22 +1,22 @@
-# OAuth Ready — Master Plan (Composio APM Integrations take-home)
+# OAuth Ready — Master Plan (project plan)
 
-> **Context recovery:** if you are a fresh session, read this file top to bottom, then [ASSIGNMENT.md](ASSIGNMENT.md) (verbatim brief).
+> **Context recovery:** if you are a fresh session, read this file top to bottom.
 > Then go to **§0 Status board**, find the first unchecked box, and continue from there. Update the status board and the **§12 Decision log** as you work.
 
-- **Date:** 2026-11-11. **Deadline:** submit tonight.
-- **Budget:** 6–8 h (brief says this). A focused working slice is enough.
+- **Date:** 2026-11-11.
+- **Scope:** a focused working slice.
 - **Working name:** **OAuth Ready**: "Look up an app, find out how long its OAuth app takes to get ready, and get a plan to do it."
-- **Repo root:** `/Users/PrakharSaxena/Documents/Code/Composio`
+- **Repo root:** the repository root directory
 
 ---
 
 ## 0. Status board (keep this current)
 
-**Current phase:** Submission. Everything built and deployed; remaining: make the repo public (user to confirm), optional hands-on checks (P5), submit links. Live: https://oauth-ready-lake.vercel.app
+**Current phase:** Release. Everything built and deployed; remaining: optional hands-on checks (P5). Live: https://oauth-ready-lake.vercel.app
 
 **Blockers / env facts (2026-11-11):**
 - LLM keys: the user has no paid key. They create free keys: **GROQ_API_KEY** (console.groq.com), **TAVILY_API_KEY** (tavily.com), optionally **MISTRAL_API_KEY** (console.mistral.ai, phone verification) and **GOOGLE_GENERATIVE_AI_API_KEY** (aistudio.google.com). These go in `.env.local`, later in Vercel env.
-- GitHub: repo **github.com/prakhar23381/oauth-ready** (private; make public at submission). `gh` is at `~/.local/bin/gh`.
+- GitHub: repo **github.com/prakhar23381/oauth-ready** (private). `gh` is at `~/.local/bin/gh`.
 - Vercel CLI logged in as `prakhar23381-9369`.
 - Stack: Next.js 15.5 + React 19 + Tailwind v4 + shadcn/ui, `src/` dir, pnpm, `@anthropic-ai/sdk` 1.8.0, zod 4, tsx.
 
@@ -30,15 +30,15 @@
 | P4 | Library generation (8–10 apps) + home/library page | 0:45 | ✅ 5 guides: Gmail T3, Slack T3, Outlook T2, GitHub T1, Spotify T4 (cut line used: 5 instead of 8–10) |
 | P5 | Verification: hands-on setup attempts + source checks → verification log | 1:15 | ◐ pages built, quote check 105/105; waiting on the user's hands-on notes (GitHub, Slack, Google Cloud, Spotify) |
 | P6 | Deploy, share features, polish, guardrails | 0:45 | ✅ https://oauth-ready-lake.vercel.app |
-| P7 | README, demo rehearsal with unfamiliar apps, submit | 0:30 | ◐ README done, rehearsal done (Xero by URL 77s, library lookups by domain), credential sweep clean; repo still private |
+| P7 | README, demo rehearsal with unfamiliar apps, release | 0:30 | ◐ README done, rehearsal done (Xero by URL 77s, library lookups by domain), credential sweep clean |
 
 **Total ≈ 7.5 h.** Cut lines are in §11 if we fall behind.
 
 ---
 
-## 1. What the brief actually asks for (requirements checklist)
+## 1. Requirements checklist
 
-Source: [ASSIGNMENT.md](ASSIGNMENT.md). Every item must be covered before submission.
+Every item must be covered before release.
 
 **Product**
 - [ ] R1: Developer can **look up an app** and get a **guide they can use and share**.
@@ -48,7 +48,7 @@ Source: [ASSIGNMENT.md](ASSIGNMENT.md). Every item must be covered before submis
 - [ ] R5: **Requirements and nuances** that could affect setup.
 - [ ] R6: **What an agent can do for them vs. where they must take over.**
 - [ ] R7: **How to proceed when they hit a blocker.**
-- [ ] R8: Developer can **submit an app name or website**; an **agent investigates and generates a shareable guide in real time**, including apps not in the library.
+- [ ] R8: Developer can **enter an app name or website**; an **agent investigates and generates a shareable guide in real time**, including apps not in the library.
 - [ ] R9: A **library** pattern exists (target is 100 apps eventually; demo a few **varied** apps).
 
 **Evidence and agents**
@@ -57,14 +57,11 @@ Source: [ASSIGNMENT.md](ASSIGNMENT.md). Every item must be covered before submis
 
 **Show it works**
 - [ ] R12: Demo on **a few real apps with different setup challenges**.
-- [ ] R13: Be ready for **an unfamiliar app submitted live**.
+- [ ] R13: Be ready for **an unfamiliar app entered live**.
 - [ ] R14: **Check a sample of guidance against real sources and setup attempts**, and show what was learned, corrected, or could not be verified.
-- [ ] R15: Submit a **link to the working experience** and a **source repo**.
+- [ ] R15: Provide a **link to the working experience** and a **source repo**.
 - [ ] R16: **README** covering setup instructions, key decisions, and limitations.
-- [ ] R17: **No credentials** in the submission.
-
-**What reviewers look for:** understanding of the developer's problem · useful guidance · sound judgment about evidence · thoughtful use of agents.
-**Also explicitly valued:** what we learned, the product decisions that follow from it, and a focused scope with a stated reason.
+- [ ] R17: **No credentials** in the repo.
 
 ---
 
@@ -326,12 +323,11 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 - [ ] Empty, error, and loading states; mobile check
 - **Exit:** public URL works end to end, including a fresh generation.
 
-### P7: README, rehearsal, submit (0:30)
+### P7: README, rehearsal, release (0:30)
 - [ ] README: what it is, live link, setup (`pnpm i`, env, `pnpm dev`, `pnpm gen:library`), architecture diagram, **key decisions** (§12), **evidence model**, **verification summary**, **limitations** (§10), cost per generation, what I'd do next (scale to 100: scheduled refresh, crowd feedback, diffing for doc changes)
 - [ ] Rehearse 3 unfamiliar apps live on prod; record timings; fix anything flaky
 - [ ] Final credential sweep: `git log -p | grep -iE "sk-ant|secret|token"`; check screenshots
-- [ ] Submit the live link + repo link
-- **Exit:** submitted.
+- **Exit:** released.
 
 ---
 
@@ -376,7 +372,7 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 | D1 | Next.js + Vercel single deploy | Fastest path to a shareable link with streaming |
 | D2 | ~~Claude Opus 5.5~~ → **free-tier provider chain via Vercel AI SDK (Groq → Mistral → Gemini) + Tavily search + own fetch** (changed 2026-11-11: user has no API key and won't pay) | Zero cost; provider fallback absorbs free-tier 429s; quote verification still works because we capture fetched text ourselves. README tells reviewers they can drop in any key. |
 | D3 | Guides are **path-aware** (scope/audience tiers) | Difficulty depends on what you request, not just the provider |
-| D4 | **Active effort and waiting time shown separately** | Answers "an hour vs weeks of waiting" from the brief |
+| D4 | **Active effort and waiting time shown separately** | Answers "an hour vs weeks of waiting" from the problem statement |
 | D5 | Evidence graded per claim + deterministic quote check + hands-on overlays | Sound judgment about evidence; regeneration never erases human verification |
 | D6 | Composio-managed shortcut shown first | Many developers don't need their own app to start; puts the guide in Composio's flow |
 | D7 | Owner chips + handoff kit (manifest/CLI/justifications) | Makes "what the agent does vs. you" concrete |
@@ -384,13 +380,13 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 | D9 | Claims can carry `conflict` + `asOf` | P1 found real conflicts (Spotify client-ID cap; Google reassessment anchor date) and fast-changing facts |
 | D10 | Tier rubric 1–4 assigned per path (docs/research-notes.md §5) | Difficulty depends on scopes and audience |
 | D12 | **Library guides researched by Claude Code in the dev session** (WebSearch/WebFetch, same schema and evidence rules); the in-app agent (free models) handles **live generation** only | Saves scarce free-tier quota for the live demo; library quality is higher; disclosed in README |
-| D13 | **Visual language = Composio's official Brand Hub** → [DESIGN.md](DESIGN.md). DEV dark default, square corners, Geist 400/500 + JetBrains Mono, spot blue #51a2ff for interactive state only; no Composio logo | Reviewers are Composio; official tokens (brand.composio.dev agent.json/llms.txt) beat community DESIGN.md files, which use the retired #0007cd |
+| D13 | **Visual language = Composio's official Brand Hub** → [DESIGN.md](DESIGN.md). DEV dark default, square corners, Geist 400/500 + JetBrains Mono, spot blue #51a2ff for interactive state only; no Composio logo | Official tokens (brand.composio.dev agent.json/llms.txt) beat community DESIGN.md files, which use the retired #0007cd |
 | D11 | Guides get a "For AI agents" nuance section | Slack non-Marketplace apps get 1 req/min on conversations.history: "approved" ≠ usable for agents |
 
 ## 13. Commands and paths (fill in as created)
 - Dev: `pnpm dev` · Library: `pnpm gen:library` · Typecheck: `pnpm tsc --noEmit`
 - Env: `.env.local` (never committed); template `.env.example`
-- Live URL: https://oauth-ready-lake.vercel.app · Repo URL: https://github.com/prakhar23381/oauth-ready (private until submission)
+- Live URL: https://oauth-ready-lake.vercel.app · Repo URL: https://github.com/prakhar23381/oauth-ready (private)
 
 ## 14a. The live agent as built (P3)
 - **No SDK.** `src/lib/agent/llm.ts` is a small OpenAI-compatible JSON client. Each model is a "lane" with its own token bucket; calls pick the best lane with room, wait when none has, and move lanes on a 429. Lanes come from env keys: Groq (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b`), plus Mistral and Gemini if their keys are set. (D2 superseded: the Vercel AI SDK was removed.)
@@ -424,7 +420,7 @@ VerificationOverlay { slug, attempts: { date, what, outcome, screenshots?[] }[],
 - Verified on production 2026-11-13: all pages 200, unknown slug 404, Calendly generated in 32s and persisted (share link 200, cached repeat in 0.6s), Webflow through the UI in 53s with live streaming progress.
 
 ## 14e. P7 notes
-- README.md is written for the Composio reviewers (setup, decisions, verification, limitations).
+- README.md covers setup, decisions, verification and limitations.
 - Production fixes after rehearsal: fact ids in estimate notes are converted to source hosts (pipeline) and cleaned at display (`cleanBasis` in `src/lib/schema/guide.ts`, must stay outside client modules: importing it from a "use client" file into a server page caused a 500); prompt now requires headline, risk and ranges to agree and bans "0 days".
 - Do not run `pnpm build` while `pnpm dev` is running: it overwrites `.next` and the dev server returns 500 until restarted with a clean `.next`.
 
