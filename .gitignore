@@ -44,3 +44,6 @@ next-env.d.ts
 .vercel
 
 .data/
+
+# local-only reference files (kept on disk, not tracked)
+/ASSIGNMENT.md
