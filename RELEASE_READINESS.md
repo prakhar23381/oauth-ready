@@ -9,12 +9,12 @@
   - Strictly local: production was not contacted.
   - Tool installs allowed: dev dependencies on this branch, scanners outside the repo.
 
-## 0. Status after fixes (branch `fix/release-readiness-2026-11-18`, commit `256be23`)
+## 0. Status after fixes (branch `fix/release-readiness-2026-11-18`, commit `ab5fb43`)
 
 **Verdict after fixes: GO-WITH-CONDITIONS.** All 22 findings are fixed, except F20, which was a measurement artefact and needed no code change. The only remaining conditions are checks that can only be done on Vercel.
 
 **Checks on the final build:**
-- **Tests:** 88 pass (79 from the audit plus 9 regression tests), stable over repeated and shuffled runs.
+- **Tests:** 89 pass (79 from the audit plus 10 regression tests), stable over repeated and shuffled runs.
 - **Type check and lint:** `tsc --noEmit` and `eslint --max-warnings=0` are clean.
 - **Production dependency audit:** `pnpm audit --prod` reports no known vulnerabilities (was 5 high and 3 moderate).
 - **axe:** 0 violations on 6 pages in both themes (was 99).
@@ -44,13 +44,31 @@ Each original reproduction was re-run against a fresh clone of the branch, set u
 | F21 | `/api/health` (configuration as booleans, no external calls), CI workflow (typecheck, lint, validate, test, prod audit, build), operations section in the README | `/api/health` returns 200 `degraded` with no keys |
 | F22 | Removed 9 unused UI files and 3 unused dependencies; `shadcn` moved to dev; `postcss` and nested `zod` overridden to patched versions | Production audit clean; build passes |
 
-**Conditions before promoting to production.** These can only be checked on Vercel; all are untested so far.
-1. **Deploy to a preview and run the browser flow there:**
-   - The origin check (F12) compares `Origin` with `x-forwarded-host` / `host`.
-   - The client IP (F11) reads Vercel's platform headers.
-   - The undici dispatcher (F13) runs on Vercel's Node runtime.
-2. **Run one live research on the preview with Blob connected,** to confirm the compare-and-swap counter (F4) against the real Blob API. Its "already exists" handling was written from the SDK types and tested only against a mock. If the real error differs, the limiter logs `limiter.store_error` and falls back to the per-instance limit; it does not fail open.
-3. **Rehearse `vercel rollback` once on a preview.**
+**Verified on a Vercel preview** (2026-11-19).
+- **Setup:** branch `fix/release-readiness-2026-11-18`, deployed with the CLI. The Groq and Tavily keys are added as Preview variables scoped to this branch only; Blob is shared with production.
+- **Infrastructure:** Vercel runs **Node v26.13.1**. Development and CI use Node 22.
+- **Deployment protection:** previews are behind Vercel login (plain requests get a 302). The checks below went through `vercel curl`.
+
+| Check | Result |
+|---|---|
+| Pages and API smoke test | All 12 routes return the expected code (`/guides/nope` 404) |
+| `/api/health` | `ok`: live research available, store `blob`, durable |
+| F2, F9 | `null` body 400, numeric query 400, traversal 404 |
+| F12 with real Vercel headers | `text/plain` 415, evil `Origin` 403, `Sec-Fetch-Site: cross-site` 403. Same-origin request (`Origin` = preview URL) 200. Rejections logged as `generate.rejected`. |
+| F11 | Spoofed `X-Forwarded-For` values never reached the app: the hashed diagnostics show `x-real-ip`, `x-vercel-forwarded-for` and `x-forwarded-for` all equal to the real client address, so Vercel overwrites the header. The rate-limit key uses the real address. |
+| F4 on the real Blob store | The counter `limits/<day>.json` is created and updated with compare-and-swap (9 runs counted, no `limiter.store_error`). The 7th request this hour was refused with "Limit reached: 6 live research runs per hour". |
+| Full live run (Dropbox) | 65s, 33 facts, 32 quotes matched, guide saved to Blob, `/guides/dropbox` 200 |
+| **F23 (new, found here, fixed)** | The endpoint probe reported "no discovery document" for Dropbox, which has one. A diagnostic preview showed `fetch failed: invalid onError method` (`UND_ERR_INVALID_ARG`): Node 26's built-in `fetch` rejects an undici 6 `Agent`. Locally, Node 22 bundles undici 6, so every local test passed. **Fix:** `safeFetch` uses undici's own `fetch` with its `Agent`. Re-checked on Vercel: `safeFetch` 200, metadata IP blocked, Dropbox probes find the discovery document and authorize endpoint. Regression test added. |
+| `.env.local` upload check | A probe deploy with a dummy `.env.local` (`TAVILY_API_KEY=dummy`) reported `searchKey: false`. The CLI does not upload git-ignored env files, so past production deploys never shipped the local keys file. |
+
+**Findings from the preview:**
+- **F23 (fixed):** see the table above. More generally, dev and CI run Node 22 while Vercel runs Node 26. Pinning one version (`engines` in `package.json`, and the CI `node-version`) would keep runtime bugs reproducible locally.
+- **F24 (process):** the project is connected to GitHub. Every push to a branch deploys a preview, and **every push to `main` deploys production automatically**; production currently runs `main` at `b232663`, auto-deployed on 17 November. Merging this branch therefore ships to production immediately, so the merge itself is the release step.
+- **F25 (data):** previews share production's Blob store. Guides generated on a preview (Dropbox) appear on production's "Recently researched", and preview test runs count toward production's daily limit (11 of 40 used on 2026-11-18 UTC).
+
+**Still to do before the release is fully verified:**
+1. A live research run on the *final* preview build, to see the probe fix inside the app and not just the diagnostic route. My IP used its 6 runs this hour; the window resets at 22:00 UTC.
+2. Rollback rehearsal. `vercel rollback` only acts on production, so it can't be rehearsed on a preview. Proposed: after the merge auto-deploys, run `vercel rollback` to the current production deployment (`dpl_7Mx7tPbnd6jt11AtivisSWjJRpde`), check it, then promote the new one again.
 
 Not covered by any fix: live model output variance, and the free-tier quota itself.
 
