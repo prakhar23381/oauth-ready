@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { COMPOSIO_CALLBACK_URL, COMPOSIO_DIRECTORY_FETCHED_AT, COMPOSIO_DIRECTORY_SOURCE, lookupComposio, normalizeAppName } from "@/lib/composio-directory";
+import { COMPOSIO_CALLBACK_URL, COMPOSIO_DIRECTORY_FETCHED_AT, COMPOSIO_DIRECTORY_SOURCE, lookupComposio } from "@/lib/composio-directory";
 import { Guide, type Claim, type GuideInput, type Range } from "@/lib/schema/guide";
 import { PublicError, type Emit } from "./events";
 import { completeJson, hasLlm, newUsage } from "./llm";
@@ -343,4 +343,3 @@ export async function researchGuide(query: string, emit: Emit): Promise<Generate
   return { guide, ms: Date.now() - started };
 }
 
-export { normalizeAppName };

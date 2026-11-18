@@ -150,7 +150,9 @@ export default async function VerificationPage() {
                     <th className="py-2 font-normal">App</th>
                     <th className="py-2 text-right font-normal">Time</th>
                     <th className="py-2 text-right font-normal">Quotes matched</th>
-                    <th className="w-8" />
+                    <th className="w-8">
+                      <span className="sr-only">Notes</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">

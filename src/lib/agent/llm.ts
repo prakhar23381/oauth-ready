@@ -49,7 +49,6 @@ function buildLanes(): Lane[] {
 let LANES: Lane[] | null = null;
 const lanes = () => (LANES ??= buildLanes());
 export const hasLlm = () => lanes().length > 0;
-export const laneSummary = () => lanes().map((l) => l.id).join(", ");
 
 const estTokens = (s: string) => Math.ceil(s.length / 3.5);
 const avail = (l: Lane) => Math.min(l.limit, l.remaining + ((Date.now() - l.stamp) * l.limit) / 60_000);

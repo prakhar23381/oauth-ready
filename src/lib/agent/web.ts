@@ -1,4 +1,6 @@
+import dns from "node:dns";
 import { lookup } from "node:dns/promises";
+import { Agent } from "undici";
 import { PublicError } from "./events";
 import net from "node:net";
 
@@ -39,6 +41,26 @@ async function assertPublic(u: URL) {
   if (!addrs.length || addrs.some((a) => isPrivate(a.address))) throw new Error("Blocked address");
 }
 
+type LookupCallback = (err: NodeJS.ErrnoException | null, address?: string | dns.LookupAddress[], family?: number) => void;
+
+/**
+ * DNS lookup used by the socket itself. The address that is checked is the address that is
+ * connected to, so a DNS answer that changes between check and connect (DNS rebinding) cannot
+ * reach a private network.
+ */
+export function guardedLookup(hostname: string, options: dns.LookupOptions, callback: LookupCallback) {
+  dns.lookup(hostname, { ...options, all: true }, (err, addrs) => {
+    if (err) return callback(err);
+    const list = addrs as dns.LookupAddress[];
+    const blocked = !list.length || list.some((a) => isPrivate(a.address));
+    if (blocked) return callback(Object.assign(new Error(`Blocked address for ${hostname}`), { code: "EBLOCKED" }));
+    if (options.all) return callback(null, list);
+    callback(null, list[0].address, list[0].family);
+  });
+}
+
+export const guardedAgent = new Agent({ connect: { lookup: guardedLookup as never } });
+
 export type SafeResponse = { status: number; url: string; contentType: string; body: string; location?: string };
 
 export async function safeFetch(url: string, opts: { timeoutMs?: number; maxBytes?: number; followRedirects?: number; accept?: string } = {}): Promise<SafeResponse> {
@@ -47,10 +69,12 @@ export async function safeFetch(url: string, opts: { timeoutMs?: number; maxByte
   for (let hop = 0; ; hop++) {
     await assertPublic(current);
     const res = await fetch(current, {
+      // Node's fetch accepts an undici dispatcher; the guarded agent re-checks every connection.
+      dispatcher: guardedAgent,
       redirect: "manual",
       signal: AbortSignal.timeout(opts.timeoutMs ?? 7000),
       headers: { "user-agent": "OAuthReadyBot/0.1 (research agent)", accept: opts.accept ?? "text/html,application/json;q=0.9,*/*;q=0.5", "accept-language": "en-US,en;q=0.9" },
-    });
+    } as RequestInit);
     const location = res.headers.get("location") ?? undefined;
     if (res.status >= 300 && res.status < 400 && location && hop < max) {
       current = new URL(location, current);

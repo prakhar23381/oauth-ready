@@ -127,3 +127,33 @@ describe("excerpt", () => {
     expect(excerpt(text, 4200)).toContain("6 weeks");
   });
 });
+
+describe("connect-time address check (F13, DNS rebinding)", () => {
+  it("blocks a connection to a private address even when the URL check is skipped", async () => {
+    const http = await import("node:http");
+    const { guardedAgent } = await import("@/lib/agent/web");
+    const server = http.createServer((_q, r) => r.end("internal")).listen(0);
+    const port = (server.address() as { port: number }).port;
+    try {
+      // A rebinding DNS answer would reach exactly this: a hostname that resolves to a private address.
+      await expect(fetch(`http://localhost:${port}/`, { dispatcher: guardedAgent } as RequestInit)).rejects.toThrow();
+    } finally {
+      server.close();
+    }
+  });
+  it("guardedLookup refuses private answers and passes public ones", async () => {
+    const { guardedLookup } = await import("@/lib/agent/web");
+    const dns = await import("node:dns");
+    const spy = vi.spyOn(dns.default, "lookup");
+    const run = (addrs: { address: string; family: number }[], all: boolean) =>
+      new Promise<unknown>((resolve) => {
+        spy.mockImplementationOnce(((_h: string, _o: unknown, cb: (e: null, a: typeof addrs) => void) => cb(null, addrs)) as never);
+        guardedLookup("rebind.test", { all }, (err, address) => resolve(err ? `error: ${err.message}` : address));
+      });
+    expect(await run([{ address: "93.184.215.14", family: 4 }, { address: "10.0.0.7", family: 4 }], false)).toMatch(/Blocked/);
+    expect(await run([{ address: "169.254.169.254", family: 4 }], true)).toMatch(/Blocked/);
+    expect(await run([{ address: "93.184.215.14", family: 4 }], false)).toBe("93.184.215.14");
+    expect(await run([{ address: "93.184.215.14", family: 4 }], true)).toEqual([{ address: "93.184.215.14", family: 4 }]);
+    spy.mockRestore();
+  });
+});

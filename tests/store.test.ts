@@ -99,28 +99,41 @@ describe("rate limits", () => {
     expect(await checkGenerateLimit("7.7.7.7")).toBeNull(); // a different, legitimate visitor
   });
 
-  it("Blob: concurrent requests from one IP cannot exceed the per-IP limit", async () => {
-    const blobs: string[] = [];
+  it("Blob: concurrent requests across separate instances cannot exceed the per-IP limit (F4)", async () => {
+    // A shared fake Blob store with real ETag semantics: put with ifMatch fails if the blob changed.
+    const objects = new Map<string, { body: string; etag: string }>();
+    let version = 0;
+    const latency = () => new Promise((r) => setTimeout(r, Math.random() * 8));
+    class BlobPreconditionFailedError extends Error {}
     vi.doMock("@vercel/blob", () => ({
-      list: async ({ prefix }: { prefix: string }) => {
-        await new Promise((r) => setTimeout(r, 5)); // network latency
-        return { blobs: blobs.filter((p) => p.startsWith(prefix)).map((pathname) => ({ pathname, uploadedAt: new Date() })) };
+      BlobPreconditionFailedError,
+      list: async () => ({ blobs: [] }),
+      get: async (p: string) => {
+        await latency();
+        const o = objects.get(p);
+        return o ? { statusCode: 200, stream: new Response(o.body).body, blob: { etag: o.etag } } : null;
       },
-      put: async (p: string) => {
-        await new Promise((r) => setTimeout(r, 5));
-        blobs.push(p);
+      put: async (p: string, body: string, opts: { ifMatch?: string; allowOverwrite?: boolean }) => {
+        await latency();
+        const o = objects.get(p);
+        if (opts.ifMatch !== undefined && o?.etag !== opts.ifMatch) throw new BlobPreconditionFailedError("precondition failed");
+        if (opts.ifMatch === undefined && o && !opts.allowOverwrite) throw new Error("This blob already exists");
+        objects.set(p, { body, etag: `e${++version}` });
         return {};
       },
-      get: async () => null,
     }));
     process.env.BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_test";
-    const { checkGenerateLimit } = await import("@/lib/store");
-    const results = await Promise.all(Array.from({ length: 12 }, () => checkGenerateLimit("8.8.8.8")));
-    expect(results.filter((r) => r === null).length).toBeLessThanOrEqual(6);
+    const instanceA = await import("@/lib/store");
+    vi.resetModules(); // a second module instance = a second serverless instance with its own memory
+    const instanceB = await import("@/lib/store");
+    expect(instanceA).not.toBe(instanceB);
+    const results = await Promise.all(Array.from({ length: 12 }, (_, i) => (i % 2 ? instanceA : instanceB).checkGenerateLimit("8.8.8.8")));
+    expect(results.filter((r) => r === null).length).toBe(6);
   });
 
   it("Blob: a store failure while saving surfaces as an error", async () => {
     vi.doMock("@vercel/blob", () => ({
+      BlobPreconditionFailedError: class extends Error {},
       list: async () => ({ blobs: [] }),
       put: async () => {
         throw new Error("BlobServiceNotAvailable");
@@ -134,13 +147,16 @@ describe("rate limits", () => {
 
   it("Blob: a store outage does not silently remove the rate limit", async () => {
     vi.doMock("@vercel/blob", () => ({
+      BlobPreconditionFailedError: class extends Error {},
       list: async () => {
         throw new Error("BlobAccessError: invalid token");
       },
       put: async () => {
         throw new Error("BlobAccessError: invalid token");
       },
-      get: async () => null,
+      get: async () => {
+        throw new Error("BlobAccessError: invalid token");
+      },
     }));
     process.env.BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_bad";
     const { checkGenerateLimit } = await import("@/lib/store");

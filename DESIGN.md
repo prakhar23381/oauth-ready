@@ -211,6 +211,19 @@ Write product copy in a professional, neutral register, the way Composio's docs 
 - No chatty phrasing, slang or idiom in labels or guide content ("dies weekly", "stuck", "pick", "watch out").
 - State facts directly and keep them short. Guide content written by the agent follows the same rule (enforced in the agent's prompt).
 
+## 8c. Accessibility adjustments to the brand tokens
+
+The Brand Hub's semantic colours are used for small text (chips, labels), where WCAG AA needs 4.5:1. Measured with axe, several failed. They were adjusted in lightness only, keeping hue and chroma, until every surface (`background`, `card`, `popover`) reached at least 4.6:1:
+
+| Token | Brand Hub | Used here |
+|---|---|---|
+| `destructive` light | `oklch(0.577 0.215 27.3)` | `oklch(0.57 0.215 27.3)` |
+| `destructive` dark | `oklch(0.637 0.208 25.3)` | `oklch(0.69 0.208 25.3)` |
+| `success` light | `oklch(0.546 0.16 155.8)` | `oklch(0.516 0.16 155.8)` |
+| `warning` light | `oklch(0.666 0.16 75)` | `oklch(0.548 0.16 75)` |
+| `subtle-foreground` | 45% alpha | 60% light, 55% dark |
+| `muted-foreground` | 60% alpha | 72% light, 70% dark |
+
 ## 9. Don'ts (quick reference)
 
 - ❌ `font-semibold` / `font-bold` on any sans text

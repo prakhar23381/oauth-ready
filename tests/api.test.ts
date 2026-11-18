@@ -113,3 +113,24 @@ describe("POST /api/generate cross-site protection (F12)", () => {
     }
   });
 });
+
+describe("clientIp (F11)", () => {
+  it("on Vercel prefers the platform-set address over a client-supplied X-Forwarded-For", async () => {
+    const { clientIp } = await import("@/lib/request");
+    const prev = process.env.VERCEL;
+    process.env.VERCEL = "1";
+    try {
+      const req = new Request("http://x/api/generate", { headers: { "x-forwarded-for": "6.6.6.6", "x-real-ip": "203.0.113.9" } });
+      expect(clientIp(req)).toBe("203.0.113.9");
+      expect(clientIp(new Request("http://x", { headers: { "x-vercel-forwarded-for": "198.51.100.4, 10.0.0.1" } }))).toBe("198.51.100.4");
+    } finally {
+      if (prev === undefined) delete process.env.VERCEL;
+      else process.env.VERCEL = prev;
+    }
+  });
+  it("locally uses the first X-Forwarded-For entry, or 'local'", async () => {
+    const { clientIp } = await import("@/lib/request");
+    expect(clientIp(new Request("http://x", { headers: { "x-forwarded-for": "1.1.1.1, 2.2.2.2" } }))).toBe("1.1.1.1");
+    expect(clientIp(new Request("http://x"))).toBe("local");
+  });
+});

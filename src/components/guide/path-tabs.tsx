@@ -7,7 +7,7 @@ import { Chip } from "@/components/chip";
 import { cleanBasis, formatRange, type Owner, type Path, type Step } from "@/lib/schema/guide";
 import { OWNER_META, TIER_META } from "@/lib/ui-meta";
 import { ClaimRefs } from "./claims";
-import { Hint, Tip } from "@/components/tip";
+import { Tip } from "@/components/tip";
 import { CopyButton } from "./copy-button";
 import { cn } from "@/lib/utils";
 
@@ -78,9 +78,11 @@ function StepRow({ step, index, open, onToggle }: { step: Step; index: number; o
     <li>
       <button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full cursor-pointer items-center gap-3 py-3 text-left hover:bg-accent/50">
         <span className="meta-mono w-5 shrink-0 text-subtle-foreground">{String(index + 1).padStart(2, "0")}</span>
-        <Hint label={OWNER_META[step.owner].label}>
-          <Icon className={cn("size-4 shrink-0", waiting ? "text-warning" : step.owner === "agent" ? "text-foreground" : "text-subtle-foreground")} aria-label={OWNER_META[step.owner].label} />
-        </Hint>
+        {/* Inside a button, so a native title (not an interactive tooltip) plus screen-reader text. */}
+        <span title={OWNER_META[step.owner].label} className="inline-flex">
+          <Icon aria-hidden className={cn("size-4 shrink-0", waiting ? "text-warning" : step.owner === "agent" ? "text-foreground" : "text-subtle-foreground")} />
+          <span className="sr-only">{OWNER_META[step.owner].label}: </span>
+        </span>
         <span className="min-w-0 flex-1">{step.title}</span>
         {step.estTime && <span className={cn("meta-mono hidden shrink-0 sm:inline", waiting ? "text-warning" : "text-subtle-foreground")}>{formatRange(step.estTime)}</span>}
         <ChevronRight className={cn("size-4 shrink-0 text-subtle-foreground transition-transform", open && "rotate-90")} />

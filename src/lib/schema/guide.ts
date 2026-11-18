@@ -68,12 +68,6 @@ export const Step = z.object({
 export type Step = z.infer<typeof Step>;
 
 export const Tier = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]);
-export const TIER_LABELS: Record<1 | 2 | 3 | 4, string> = {
-  1: "Self-serve",
-  2: "Light review",
-  3: "Formal review",
-  4: "Gated",
-};
 
 export const Path = z.object({
   id: z.string(),
@@ -231,24 +225,12 @@ export type VerificationOverlay = z.infer<typeof VerificationOverlay>;
 
 // ---------- helpers ----------
 
-const UNIT_MIN: Record<z.infer<typeof TimeUnit>, number> = {
-  minutes: 1,
-  hours: 60,
-  days: 60 * 24,
-  weeks: 60 * 24 * 7,
-  months: 60 * 24 * 30,
-};
-
 export function formatRange(r: Range): string {
   const unit = (n: number) => (n === 1 ? r.unit.replace(/s$/, "") : r.unit);
   if (r.max === 0) return "Immediate";
   if (r.min === r.max) return `${r.min} ${unit(r.max)}`;
   if (r.min === 0) return `up to ${r.max} ${unit(r.max)}`;
   return `${r.min}–${r.max} ${unit(r.max)}`;
-}
-
-export function rangeMinutes(r: Range) {
-  return { min: r.min * UNIT_MIN[r.unit], max: r.max * UNIT_MIN[r.unit] };
 }
 
 export function defaultPath(g: Guide): Path {

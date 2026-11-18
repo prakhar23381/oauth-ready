@@ -179,7 +179,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
             <Section id="watch" title="Considerations" tip="Limits and policies that affect setup or ongoing operation, most severe first.">
               <div className="divide-y border-y">
                 {nuances.map((n) => (
-                  <Disclosure key={n.title} icon={SEVERITY_ICON[n.severity]} title={n.title} aside={n.forAgents ? <Tip content="Particularly relevant to long-running AI agents."><Chip>AI agents</Chip></Tip> : undefined}>
+                  <Disclosure key={n.title} icon={SEVERITY_ICON[n.severity]} title={n.title} aside={n.forAgents ? <Chip title="Particularly relevant to long-running AI agents">AI agents</Chip> : undefined}>
                     <p className="pl-7 text-sm text-muted-foreground">
                       {n.detail}
                       <ClaimRefs ids={n.claimIds} />

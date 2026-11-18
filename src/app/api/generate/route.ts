@@ -5,32 +5,12 @@ import { researchGuide, slugify } from "@/lib/agent/pipeline";
 import { PublicError, type AgentEvent } from "@/lib/agent/events";
 import { log } from "@/lib/store";
 import { z } from "zod";
+import { clientIp, crossSiteReason } from "@/lib/request";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
 const Body = z.object({ query: z.string(), force: z.boolean().optional() });
-
-/**
- * Only same-origin browser requests may start a run. Cross-site pages could otherwise make their
- * visitors spend this demo's free quotas. A JSON content type forces a CORS preflight, and the
- * Origin and Sec-Fetch-Site headers identify cross-site requests that slip through.
- */
-function crossSiteReason(req: Request): string | null {
-  if (!(req.headers.get("content-type") ?? "").toLowerCase().startsWith("application/json")) return "unsupported_content_type";
-  const site = req.headers.get("sec-fetch-site");
-  if (site && site !== "same-origin" && site !== "none") return "cross_site";
-  const origin = req.headers.get("origin");
-  if (origin) {
-    const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? new URL(req.url).host;
-    try {
-      if (new URL(origin).host !== host) return "cross_origin";
-    } catch {
-      return "bad_origin";
-    }
-  }
-  return null;
-}
 
 /** POST {query, force?} → newline-delimited JSON stream of AgentEvent. */
 export async function POST(req: Request) {
@@ -68,7 +48,7 @@ export async function POST(req: Request) {
           if (existing) return emit({ type: "done", slug: existing.slug, cached: true, ms: 0 });
         }
         if (!hasDurableStore()) return emit({ type: "error", message: "Live research is unavailable on this deployment because no storage is configured. Library guides remain available." });
-        const ip = (req.headers.get("x-forwarded-for") ?? "local").split(",")[0].trim();
+        const ip = clientIp(req);
         const refused = await checkGenerateLimit(ip);
         if (refused) {
           log("generate.limited", { runId, query });

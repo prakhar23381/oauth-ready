@@ -75,6 +75,7 @@ pnpm dev                       # http://localhost:3000
 
 | Command | What it does |
 |---|---|
+| `pnpm test` | Runs the test suite (models, search and storage are mocked) |
 | `pnpm gen "<app>" [--save]` | Runs the research agent in the terminal |
 | `pnpm validate` | Checks library guides against the schema and claim references |
 | `pnpm verify:quotes` | Re-fetches sources and checks every library quote |
@@ -82,12 +83,47 @@ pnpm dev                       # http://localhost:3000
 
 Generated guides are stored in `.data/` locally. On Vercel they go to a private Blob store (`BLOB_READ_WRITE_TOKEN`), or to Upstash Redis if configured. No credentials are committed.
 
+## Operating it
+
+**Deploy.** CI (`.github/workflows/ci.yml`) runs the type check, lint, guide validation, tests, the production dependency audit and a build on every push and pull request. Deploy to a preview first with `vercel deploy`. Check the preview, then promote it with `vercel deploy --prod` or from the Vercel dashboard.
+
+**Check health.** `GET /api/health` returns:
+- `status`: `ok`, `degraded` (library works, live research does not), or `down`.
+- Whether each key is set, as booleans only.
+- The storage backend in use.
+- The deployed commit.
+
+It makes no external calls.
+
+**Roll back.** Run `vercel rollback` or use Instant Rollback in the dashboard to restore the previous production deployment. Stored guides are plain JSON and the schema has stayed backward compatible, so no data step is needed. Then check `/api/health` and open one guide.
+
+**Read the logs.** In Vercel's runtime logs, each research run writes one JSON line per event. The `runId` in an error shown to a user matches the logs.
+
+| Event | Meaning |
+|---|---|
+| `generate.start` / `generate.done` | A run started, or finished with its duration and claim count |
+| `generate.failed` | A run failed. The full error is here; users see only a generic message and the reference ID. |
+| `generate.limited` | A rate limit refused the run |
+| `generate.rejected` | A non-JSON or cross-site request was refused |
+| `limiter.store_error` | The shared store failed. The per-instance limit still applies. |
+| `store.ephemeral` | Running on Vercel without Blob or Redis, so live research is disabled |
+
+**Common problems.**
+
+| Symptom | Cause | What to do |
+|---|---|---|
+| "No model API key is configured" | `GROQ_API_KEY` (or a Mistral or Gemini key) is missing | Set it in the Vercel project's environment and redeploy |
+| "Live research is unavailable … no storage is configured" | No `BLOB_READ_WRITE_TOKEN` or Redis variables on Vercel | Connect a Blob store to the project |
+| "Limit reached" / "daily limit" | The per-IP or daily limit was reached | Wait, or raise `GENERATE_LIMIT_PER_IP` / `GENERATE_LIMIT_PER_DAY` |
+| Many `generate.failed` entries with HTTP 429 | The free model quota is used up for the day | Add a Mistral or Gemini key as a fallback, or wait for the quota to reset |
+
 ## Layout
 
 ```
 src/lib/agent/        research agent: pipeline, prompts, model client, web tools, probes
 src/lib/schema/       guide schema (Zod), shared by the agent, the library and the UI
-src/app/              pages: home, /generate, /guides/[slug], /verification, /about; API routes
+src/app/              pages: home, /generate, /guides/[slug], /verification, /about; API routes incl. /api/health
+tests/                Vitest suite (mocked external services)
 data/guides/          library guides
 data/verification/    quote check results, findings, hands-on overlays
 docs/research-notes.md  initial research

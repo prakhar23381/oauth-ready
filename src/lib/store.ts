@@ -4,7 +4,7 @@ import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
 import { Redis } from "@upstash/redis";
-import { get as blobGet, list as blobList, put as blobPut } from "@vercel/blob";
+import { BlobPreconditionFailedError, get as blobGet, list as blobList, put as blobPut } from "@vercel/blob";
 import { Guide, isSlug } from "@/lib/schema/guide";
 
 /**
@@ -125,6 +125,40 @@ export function log(event: string, fields: Record<string, unknown> = {}, level: 
  * that a list-then-write store cannot), then the durable store (Redis counters or Blob markers).
  * If the durable store fails, the in-memory layer still applies, so the limit never switches off.
  */
+type DayCounter = { total: number; ip: Record<string, number> };
+
+/**
+ * Shared counter for one day, stored as a single Blob and updated with compare-and-swap:
+ * read it with its ETag, write it back only if the ETag still matches, retry on conflict.
+ * Concurrent runs on different instances therefore cannot both take the last slot.
+ */
+async function blobCounterCheck(day: string, ipKey: string, perIp: string, perDay: string): Promise<string | null> {
+  const pathname = `limits/${day}.json`;
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const res = await blobGet(pathname, { access: "private", useCache: false });
+    const current: DayCounter = res?.statusCode === 200 ? JSON.parse(await readStream(res.stream)) : { total: 0, ip: {} };
+    if ((current.ip[ipKey] ?? 0) >= LIMITS.perIpPerHour) return perIp;
+    if (current.total >= LIMITS.globalPerDay) return perDay;
+    const next: DayCounter = { total: current.total + 1, ip: { ...current.ip, [ipKey]: (current.ip[ipKey] ?? 0) + 1 } };
+    try {
+      await blobPut(pathname, JSON.stringify(next), {
+        access: "private",
+        addRandomSuffix: false,
+        contentType: "application/json",
+        cacheControlMaxAge: 60,
+        // Existing counter: only overwrite the version we read. New counter: fail if another instance created it first.
+        ...(res ? { ifMatch: res.blob.etag } : { allowOverwrite: false }),
+      });
+      return null;
+    } catch (e) {
+      const conflict = e instanceof BlobPreconditionFailedError || /already exists|precondition/i.test((e as Error).message);
+      if (!conflict) throw e;
+      await new Promise((r) => setTimeout(r, 20 + Math.random() * 80 * (attempt + 1)));
+    }
+  }
+  throw new Error("Rate-limit counter is under heavy contention");
+}
+
 export async function checkGenerateLimit(ip: string): Promise<string | null> {
   const day = new Date().toISOString().slice(0, 10);
   const hour = Math.floor(Date.now() / 3_600_000);
@@ -153,13 +187,7 @@ export async function checkGenerateLimit(ip: string): Promise<string | null> {
       if (b > LIMITS.globalPerDay) return perDay;
       return null;
     }
-    if (blob) {
-      const [ipRuns, dayRuns] = await Promise.all([blobList({ prefix: `runs/${day}/${hour}-${ipHash}-`, limit: 100 }), blobList({ prefix: `runs/${day}/`, limit: 1000 })]);
-      // This instance's own run is already counted in memory, so compare the stored count before adding ours.
-      if (ipRuns.blobs.length >= LIMITS.perIpPerHour) return perIp;
-      if (dayRuns.blobs.length >= LIMITS.globalPerDay) return perDay;
-      await blobPut(`runs/${day}/${hour}-${ipHash}-${Date.now()}`, "1", { access: "private", addRandomSuffix: true, contentType: "text/plain" });
-    }
+    if (blob) return await blobCounterCheck(day, `${hour}-${ipHash}`, perIp, perDay);
   } catch (e) {
     log("limiter.store_error", { backend: storeBackend, error: (e as Error).message }, "warn");
   }
