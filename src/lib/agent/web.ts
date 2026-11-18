@@ -1,6 +1,6 @@
 import dns from "node:dns";
 import { lookup } from "node:dns/promises";
-import { Agent } from "undici";
+import { Agent, fetch as undiciFetch } from "undici";
 import { PublicError } from "./events";
 import net from "node:net";
 
@@ -68,13 +68,14 @@ export async function safeFetch(url: string, opts: { timeoutMs?: number; maxByte
   const max = opts.followRedirects ?? 3;
   for (let hop = 0; ; hop++) {
     await assertPublic(current);
-    const res = await fetch(current, {
-      // Node's fetch accepts an undici dispatcher; the guarded agent re-checks every connection.
+    // undici's own fetch with its own Agent: the dispatcher always matches the fetch implementation.
+    // (Passing this Agent to the runtime's built-in fetch fails on Node versions that bundle a different undici.)
+    const res = await undiciFetch(current.toString(), {
       dispatcher: guardedAgent,
       redirect: "manual",
       signal: AbortSignal.timeout(opts.timeoutMs ?? 7000),
       headers: { "user-agent": "OAuthReadyBot/0.1 (research agent)", accept: opts.accept ?? "text/html,application/json;q=0.9,*/*;q=0.5", "accept-language": "en-US,en;q=0.9" },
-    } as RequestInit);
+    });
     const location = res.headers.get("location") ?? undefined;
     if (res.status >= 300 && res.status < 400 && location && hop < max) {
       current = new URL(location, current);

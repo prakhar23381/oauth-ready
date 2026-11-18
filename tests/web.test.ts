@@ -2,7 +2,18 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import fc from "fast-check";
 import { excerpt, htmlToText, quoteInText, safeFetch } from "@/lib/agent/web";
 
-afterEach(() => vi.unstubAllGlobals());
+// safeFetch uses undici's own fetch (so its dispatcher always matches). Tests swap in a fake through
+// this hook; with no fake set, the real undici fetch runs.
+const fetchHook = vi.hoisted(() => ({ fake: null as null | ((...args: unknown[]) => unknown) }));
+vi.mock("undici", async (orig) => {
+  const real = await orig<typeof import("undici")>();
+  return { ...real, fetch: (...args: unknown[]) => (fetchHook.fake ? fetchHook.fake(...args) : (real.fetch as (...a: unknown[]) => unknown)(...args)) };
+});
+const stubFetch = (f: (...args: unknown[]) => unknown) => (fetchHook.fake = f);
+afterEach(() => {
+  fetchHook.fake = null;
+  vi.unstubAllGlobals();
+});
 
 describe("safeFetch SSRF guard", () => {
   const blocked = [
@@ -22,20 +33,27 @@ describe("safeFetch SSRF guard", () => {
   for (const url of blocked) {
     it(`refuses ${url} without making a request`, async () => {
       const spy = vi.fn();
-      vi.stubGlobal("fetch", spy);
+      stubFetch(spy);
       await expect(safeFetch(url)).rejects.toThrow();
       expect(spy).not.toHaveBeenCalled();
     });
   }
 
+  it("does not use the runtime's global fetch (its bundled undici may not accept our Agent)", async () => {
+    // On Vercel (Node 26) the global fetch rejected an undici 6 Agent with "invalid onError method".
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("global fetch must not be used"); }));
+    stubFetch(vi.fn().mockResolvedValue(new Response("ok", { status: 200, headers: { "content-type": "text/plain" } })));
+    await expect(safeFetch("https://93.184.215.14/")).resolves.toMatchObject({ status: 200, body: "ok" });
+  });
+
   it("refuses plain http", async () => {
-    vi.stubGlobal("fetch", vi.fn());
+    stubFetch(vi.fn());
     await expect(safeFetch("http://93.184.215.14/")).rejects.toThrow(/https/);
   });
 
   it("re-checks every redirect hop and refuses a redirect to a private address", async () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 302, headers: { location: "https://169.254.169.254/latest/meta-data/" } }));
-    vi.stubGlobal("fetch", fetchMock);
+    stubFetch(fetchMock);
     await expect(safeFetch("https://93.184.215.14/start")).rejects.toThrow(/Blocked/);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
@@ -44,7 +62,7 @@ describe("safeFetch SSRF guard", () => {
     // 50 chunks of 1 KB; reading must stop shortly after the cap.
     const chunk = new TextEncoder().encode("a".repeat(1024));
     const body = new ReadableStream({ start(c) { for (let i = 0; i < 50; i++) c.enqueue(chunk); c.close(); } });
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(body, { status: 200, headers: { "content-type": "text/plain" } })));
+    stubFetch(vi.fn().mockResolvedValue(new Response(body, { status: 200, headers: { "content-type": "text/plain" } })));
     const r = await safeFetch("https://93.184.215.14/big", { maxBytes: 10_000 });
     expect(r.body.length).toBeLessThanOrEqual(10_000 + 1024);
   });
@@ -132,11 +150,12 @@ describe("connect-time address check (F13, DNS rebinding)", () => {
   it("blocks a connection to a private address even when the URL check is skipped", async () => {
     const http = await import("node:http");
     const { guardedAgent } = await import("@/lib/agent/web");
+    const { fetch: undiciFetch } = await import("undici");
     const server = http.createServer((_q, r) => r.end("internal")).listen(0);
     const port = (server.address() as { port: number }).port;
     try {
       // A rebinding DNS answer would reach exactly this: a hostname that resolves to a private address.
-      await expect(fetch(`http://localhost:${port}/`, { dispatcher: guardedAgent } as RequestInit)).rejects.toThrow();
+      await expect(undiciFetch(`http://localhost:${port}/`, { dispatcher: guardedAgent })).rejects.toThrow();
     } finally {
       server.close();
     }
