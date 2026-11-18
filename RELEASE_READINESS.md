@@ -9,7 +9,40 @@
   - Strictly local: production was not contacted.
   - Tool installs allowed: dev dependencies on this branch, scanners outside the repo.
 
-## 1. Verdict: NO-GO, by the stated blocker rules
+## 0. Status after fixes (branch `fix/release-readiness-2026-11-18`, commit `4143bc9`)
+
+**Verdict after fixes: GO-WITH-CONDITIONS.**
+
+All 84 tests pass (79 original plus 5 new regression tests), identical across 3 runs and a shuffled run. `tsc --noEmit` and `eslint --max-warnings=0` are clean. Each original reproduction was re-run against a fresh clone of the fix branch, set up exactly as the README says, built, and served with `next start`.
+
+| ID | Fix | Re-run evidence |
+|---|---|---|
+| F1 | Strict integer parsing (`envInt`); `.env.example` lines commented out | README flow now returns the "no model API key" message instead of "Limit reached: 0" |
+| F2 | Body validated with Zod | `null`, `42`, `["a"]` and `{"$ne":""}` all return 400 |
+| F3, F14 | Two-layer limiter: per-instance memory first, then Redis or Blob. Refused requests don't touch the daily counter, and store errors fall back to the memory layer (logged). | Store tests pass |
+| F4 | Same memory layer | **Per instance only**: concurrent requests on different serverless instances can still race on Blob |
+| F5 | Hashed slug for names without Latin letters | `微信` and `카카오` get different slugs |
+| F6 | `PublicError` for user-facing messages; everything else becomes generic, with a reference ID that appears in the logs | API test passes |
+| F7, F8 | Quote-aware tag stripping; long lines split at sentence ends | Web tests pass |
+| F9 | Slug allow-list `^[a-z0-9](…)$` in loaders and the store | Both traversal URLs return 404 |
+| F10 | A stream that ends without `done` or `error` becomes an error; unreadable lines get a plain message | UI shows "Research stopped" with "Try again" in all four failure modes |
+| F12 | JSON content type required (415); cross-origin `Origin` or `Sec-Fetch-Site` rejected (403) | Evil-origin requests get 415 or 403; same-origin browser flow still 200 |
+| F15 | Live research refused on Vercel when no durable store is configured, with an error log at startup | Store test passes |
+| F16 | JSON log lines: `generate.start`, `done`, `failed`, `limited`, `rejected`, `limiter.store_error`, `store.ephemeral` | Seen in server output |
+
+**Conditions before promoting to production:**
+1. **Deploy to a Vercel preview first** and confirm the browser flow there. The origin check compares `Origin` with `x-forwarded-host` / `host`; this was verified locally only.
+2. **Still open:**
+   - F11: per-IP key from `X-Forwarded-For`. Verify on Vercel.
+   - F13: DNS-rebinding window in the SSRF guard.
+   - F17–F19: accessibility.
+   - F20–F22: performance and hygiene.
+   - F4 across instances.
+3. **Rehearse `vercel rollback` once on a preview.** It is still untested.
+
+---
+
+## 1. Verdict before fixes: NO-GO, by the stated blocker rules
 
 1. The new test suite has **13 non-flaky failing tests**. Each one documents a real source bug, and the blocker rule "failing tests" applies.
 2. No dependency issue is exploitable, no secrets were found, and the build is clean. The failures are logic, input-validation and abuse-resistance bugs.
