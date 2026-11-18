@@ -1,6 +1,7 @@
+import { createHash } from "crypto";
 import { COMPOSIO_CALLBACK_URL, COMPOSIO_DIRECTORY_FETCHED_AT, COMPOSIO_DIRECTORY_SOURCE, lookupComposio, normalizeAppName } from "@/lib/composio-directory";
 import { Guide, type Claim, type GuideInput, type Range } from "@/lib/schema/guide";
-import type { Emit } from "./events";
+import { PublicError, type Emit } from "./events";
 import { completeJson, hasLlm, newUsage } from "./llm";
 import { probeOAuth, type Probe } from "./probe";
 import * as P from "./prompts";
@@ -11,7 +12,16 @@ export const PIPELINE_VERSION = "0.2";
 type Page = { id: string; url: string; title: string; host: string; official: boolean; text: string; excerpt: string };
 type Fact = { id: string; topic: string; claim: string; quote: string; page: Page; verified: boolean };
 
-export const slugify = (s: string) => s.toLowerCase().replace(/\(.*?\)/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48) || "app";
+/**
+ * URL-safe slug. Names with no Latin letters or digits (for example 微信) get a short hash, so
+ * different apps never share a slug and overwrite each other's guide.
+ */
+export const slugify = (s: string) => {
+  const base = s.toLowerCase().replace(/\(.*?\)/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48).replace(/-+$/, "");
+  if (base) return base;
+  const hash = createHash("sha256").update(s.trim().normalize("NFC")).digest("hex").slice(0, 10);
+  return `app-${hash}`;
+};
 const cleanDomain = (d: string) => d.toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "").trim();
 const cleanUrl = (u: string) => u.split("#")[0].replace(/\/$/, "");
 const bare = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
@@ -25,7 +35,7 @@ export type Generated = { guide: Guide; ms: number };
  * and each quote is checked against that page's text before the guide is saved.
  */
 export async function researchGuide(query: string, emit: Emit): Promise<Generated> {
-  if (!hasLlm()) throw new Error("No model API key is configured (set GROQ_API_KEY).");
+  if (!hasLlm()) throw new PublicError("No model API key is configured, so live research is unavailable on this deployment.");
   const started = Date.now();
   const usage = newUsage();
 
@@ -47,7 +57,7 @@ export async function researchGuide(query: string, emit: Emit): Promise<Generate
     },
     usage,
   );
-  if (!plan.found || !plan.appName || !plan.website || plan.queries.length < 3) throw new Error(`"${query}" could not be matched to a software product. Check the spelling, or enter the product's website.`);
+  if (!plan.found || !plan.appName || !plan.website || plan.queries.length < 3) throw new PublicError(`"${query}" could not be matched to a software product. Check the spelling, or enter the product's website.`);
   const website = plan.website.startsWith("http") ? plan.website : `https://${plan.website}`;
   const official = [...new Set([cleanDomain(website), ...plan.officialDomains.map(cleanDomain)].filter((d) => d.includes(".")))];
   // A provider's own forum holds user reports, not documentation, so it is graded as community evidence.
@@ -105,7 +115,7 @@ export async function researchGuide(query: string, emit: Emit): Promise<Generate
 
   const round1 = await load(await search(plan.queries.slice(0, 6)), 6, 3);
   emit({ type: "stage", stage: "search", status: "done", note: `${round1.length} pages` });
-  if (!round1.length) throw new Error(`No readable sources were found for "${query}".`);
+  if (!round1.length) throw new PublicError(`No readable sources were found for "${query}".`);
 
   // ---------- 3. read ----------
   const facts: Fact[] = [];
@@ -176,7 +186,7 @@ export async function researchGuide(query: string, emit: Emit): Promise<Generate
   } catch {
     emit({ type: "stage", stage: "followup", status: "done", note: "skipped" });
   }
-  if (facts.length < 3) throw new Error(`Too little evidence was found for "${query}" to write a reliable guide.`);
+  if (facts.length < 3) throw new PublicError(`Too little evidence was found for "${query}" to write a reliable guide.`);
 
   const probes = await probesPromise;
 

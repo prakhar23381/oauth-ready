@@ -1,7 +1,7 @@
 import "server-only";
 import { promises as fs } from "fs";
 import path from "path";
-import { Guide, VerificationOverlay } from "@/lib/schema/guide";
+import { Guide, VerificationOverlay, isSlug } from "@/lib/schema/guide";
 import { getGeneratedGuide } from "@/lib/store";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -27,6 +27,7 @@ export async function listLibraryGuides(): Promise<Guide[]> {
 }
 
 export async function getLibraryGuide(slug: string): Promise<Guide | null> {
+  if (!isSlug(slug)) return null;
   try {
     const raw = JSON.parse(await fs.readFile(path.join(DATA_DIR, "guides", `${slug}.json`), "utf8"));
     return Guide.parse(raw);
@@ -36,6 +37,7 @@ export async function getLibraryGuide(slug: string): Promise<Guide | null> {
 }
 
 export async function getOverlay(slug: string): Promise<VerificationOverlay | null> {
+  if (!isSlug(slug)) return null;
   try {
     const raw = JSON.parse(await fs.readFile(path.join(DATA_DIR, "verification", `${slug}.json`), "utf8"));
     return VerificationOverlay.parse(raw);
@@ -68,5 +70,6 @@ export const getFindings = () => readVerification<Findings>("findings.json");
 
 /** Library first (curated), then live-generated store. */
 export async function getGuide(slug: string): Promise<Guide | null> {
+  if (!isSlug(slug)) return null;
   return (await getLibraryGuide(slug)) ?? (await getGeneratedGuide(slug));
 }

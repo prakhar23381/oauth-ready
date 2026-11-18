@@ -258,3 +258,6 @@ export function defaultPath(g: Guide): Path {
 /** Older generated guides may contain raw fact ids (F12) in an estimate's basis. */
 export const cleanBasis = (s: string) =>
   s.replace(/\b(?:facts?\s+)?F\d+(?:\s*(?:,|and|&)\s*F\d+)*\b/gi, "cited sources").replace(/^cited sources$/, "Source: cited sources");
+
+/** Slugs are lowercase letters, digits and hyphens. Anything else is rejected before it reaches a file path. */
+export const isSlug = (s: string) => /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/.test(s);

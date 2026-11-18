@@ -60,6 +60,17 @@ describe("rate limits", () => {
     const { checkGenerateLimit } = await import("@/lib/store");
     expect(await checkGenerateLimit("1.2.3.4")).toBeNull();
   });
+  it("parses limit variables strictly (F1)", async () => {
+    const { envInt } = await import("@/lib/store");
+    expect(envInt(undefined, 6)).toBe(6);
+    expect(envInt("", 6)).toBe(6);
+    expect(envInt("  ", 6)).toBe(6);
+    expect(envInt("abc", 6)).toBe(6);
+    expect(envInt("-1", 6)).toBe(6);
+    expect(envInt("2.5", 6)).toBe(6);
+    expect(envInt("12", 6)).toBe(12);
+    expect(envInt("0", 6)).toBe(0); // an explicit 0 disables live research
+  });
   it("keeps a limit when the variable is not a number", async () => {
     process.env.GENERATE_LIMIT_PER_IP = "abc";
     const { checkGenerateLimit } = await import("@/lib/store");
@@ -142,8 +153,19 @@ describe("rate limits", () => {
 describe("configuration on Vercel", () => {
   it("does not fall back to ephemeral instance storage without saying so", async () => {
     process.env.VERCEL = "1";
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
     const store = await import("@/lib/store");
-    // On Vercel without Redis or Blob, guides go to the function's temp dir and disappear on the next cold start.
-    expect(store.storeBackend).not.toBe("file");
+    // On Vercel without Redis or Blob, guides would go to the function's temp dir and disappear on the
+    // next cold start. The store must report that it is not durable (live research is then refused) and log it.
+    expect(store.hasDurableStore()).toBe(false);
+    expect(errors.mock.calls.some((c) => String(c[0]).includes("store.ephemeral"))).toBe(true);
+  });
+  it("reports a durable store locally and when Blob is configured", async () => {
+    const local = await import("@/lib/store");
+    expect(local.hasDurableStore()).toBe(true);
+    vi.resetModules();
+    process.env.VERCEL = "1";
+    process.env.BLOB_READ_WRITE_TOKEN = "vercel_blob_rw_test";
+    expect((await import("@/lib/store")).hasDurableStore()).toBe(true);
   });
 });

@@ -5,7 +5,7 @@ import os from "os";
 import path from "path";
 import { Redis } from "@upstash/redis";
 import { get as blobGet, list as blobList, put as blobPut } from "@vercel/blob";
-import { Guide } from "@/lib/schema/guide";
+import { Guide, isSlug } from "@/lib/schema/guide";
 
 /**
  * Storage for live-generated guides, so every generated guide has a durable share link.
@@ -22,6 +22,8 @@ const blob = !redis && !!process.env.BLOB_READ_WRITE_TOKEN;
 // On a serverless deployment without either store, files last only as long as the instance.
 const LOCAL_DIR = process.env.VERCEL ? path.join(os.tmpdir(), "oauth-ready", "generated") : path.join(process.cwd(), ".data", "generated");
 export const storeBackend = redis ? "redis" : blob ? "blob" : "file";
+/** False on Vercel when neither Redis nor Blob is configured: files there vanish with the instance. */
+export const hasDurableStore = () => storeBackend !== "file" || !process.env.VERCEL;
 const key = (slug: string) => `guide:${slug}`;
 const blobPath = (slug: string) => `guides/${slug}.json`;
 
@@ -30,6 +32,7 @@ async function readStream(stream: ReadableStream<Uint8Array>): Promise<string> {
 }
 
 export async function saveGeneratedGuide(g: Guide): Promise<void> {
+  if (!isSlug(g.slug)) throw new Error(`Refusing to store a guide with an invalid slug: ${JSON.stringify(g.slug)}`);
   const json = JSON.stringify(g);
   if (redis) {
     await redis.set(key(g.slug), json);
@@ -45,6 +48,7 @@ export async function saveGeneratedGuide(g: Guide): Promise<void> {
 }
 
 export async function getGeneratedGuide(slug: string): Promise<Guide | null> {
+  if (!isSlug(slug)) return null;
   try {
     if (redis) {
       const raw = await redis.get<unknown>(key(slug));
@@ -87,22 +91,39 @@ export async function listRecentGenerated(limit = 12): Promise<Guide[]> {
 
 // ---------- usage limits for live generation (protects the free-tier model and search quotas) ----------
 
-export const LIMITS = { perIpPerHour: Number(process.env.GENERATE_LIMIT_PER_IP ?? 6), globalPerDay: Number(process.env.GENERATE_LIMIT_PER_DAY ?? 40) };
+/** Reads a non-negative integer from the environment. Empty, non-numeric or negative values use the default. */
+export function envInt(value: string | undefined, fallback: number): number {
+  const v = (value ?? "").trim();
+  return /^\d+$/.test(v) ? Number(v) : fallback;
+}
+
+export const LIMITS = { perIpPerHour: envInt(process.env.GENERATE_LIMIT_PER_IP, 6), globalPerDay: envInt(process.env.GENERATE_LIMIT_PER_DAY, 40) };
 const memory = new Map<string, { count: number; resetAt: number }>();
 
-function memoryHit(k: string, windowSeconds: number): number {
+function memoryCount(k: string): number {
+  const e = memory.get(k);
+  if (!e || e.resetAt <= Date.now()) {
+    memory.delete(k);
+    return 0;
+  }
+  return e.count;
+}
+function memoryAdd(k: string, windowSeconds: number) {
   const now = Date.now();
   const e = memory.get(k);
-  if (!e || e.resetAt <= now) {
-    memory.set(k, { count: 1, resetAt: now + windowSeconds * 1000 });
-    return 1;
-  }
-  return ++e.count;
+  if (!e || e.resetAt <= now) memory.set(k, { count: 1, resetAt: now + windowSeconds * 1000 });
+  else e.count++;
+}
+
+export function log(event: string, fields: Record<string, unknown> = {}, level: "info" | "warn" | "error" = "info") {
+  console[level](JSON.stringify({ event, ...fields, at: new Date().toISOString() }));
 }
 
 /**
  * Records a run and returns an error message when it should be refused, otherwise null.
- * Redis: atomic counters. Blob: one marker file per run, counted by prefix. Files: in memory.
+ * Two layers: an in-memory counter per instance (always on; it also catches concurrent requests
+ * that a list-then-write store cannot), then the durable store (Redis counters or Blob markers).
+ * If the durable store fails, the in-memory layer still applies, so the limit never switches off.
  */
 export async function checkGenerateLimit(ip: string): Promise<string | null> {
   const day = new Date().toISOString().slice(0, 10);
@@ -110,28 +131,41 @@ export async function checkGenerateLimit(ip: string): Promise<string | null> {
   const ipHash = createHash("sha256").update(ip).digest("hex").slice(0, 12);
   const perIp = `Limit reached: ${LIMITS.perIpPerHour} live research runs per hour. Library guides remain available.`;
   const perDay = "The daily limit for live research on this demo has been reached. Library guides remain available.";
+  const ipKey = `ip:${ipHash}:${hour}`;
+  const dayKey = `day:${day}`;
+
+  // Layer 1: this instance. Count only allowed runs, so refused requests cannot use up the daily budget.
+  if (memoryCount(ipKey) >= LIMITS.perIpPerHour) return perIp;
+  if (memoryCount(dayKey) >= LIMITS.globalPerDay) return perDay;
+  memoryAdd(ipKey, 3600);
+  memoryAdd(dayKey, 86_400);
+
+  // Layer 2: shared across instances.
   try {
     if (redis) {
-      const ipKey = `limit:ip:${ipHash}:${hour}`;
-      const dayKey = `limit:day:${day}`;
-      const [a, b] = await Promise.all([redis.incr(ipKey), redis.incr(dayKey)]);
-      if (a === 1) await redis.expire(ipKey, 3600);
-      if (b === 1) await redis.expire(dayKey, 86_400);
-      if (a > LIMITS.perIpPerHour) return perIp;
+      const rIp = `limit:${ipKey}`;
+      const rDay = `limit:${dayKey}`;
+      const a = await redis.incr(rIp);
+      if (a === 1) await redis.expire(rIp, 3600);
+      if (a > LIMITS.perIpPerHour) return perIp; // refused requests never touch the daily counter
+      const b = await redis.incr(rDay);
+      if (b === 1) await redis.expire(rDay, 86_400);
       if (b > LIMITS.globalPerDay) return perDay;
       return null;
     }
     if (blob) {
       const [ipRuns, dayRuns] = await Promise.all([blobList({ prefix: `runs/${day}/${hour}-${ipHash}-`, limit: 100 }), blobList({ prefix: `runs/${day}/`, limit: 1000 })]);
+      // This instance's own run is already counted in memory, so compare the stored count before adding ours.
       if (ipRuns.blobs.length >= LIMITS.perIpPerHour) return perIp;
       if (dayRuns.blobs.length >= LIMITS.globalPerDay) return perDay;
       await blobPut(`runs/${day}/${hour}-${ipHash}-${Date.now()}`, "1", { access: "private", addRandomSuffix: true, contentType: "text/plain" });
-      return null;
     }
-    if (memoryHit(`ip:${ipHash}:${hour}`, 3600) > LIMITS.perIpPerHour) return perIp;
-    if (memoryHit(`day:${day}`, 86_400) > LIMITS.globalPerDay) return perDay;
-  } catch {
-    // If the limiter itself fails, allow the run.
+  } catch (e) {
+    log("limiter.store_error", { backend: storeBackend, error: (e as Error).message }, "warn");
   }
   return null;
+}
+
+if (!hasDurableStore()) {
+  log("store.ephemeral", { message: "No Redis or Blob store is configured on Vercel. Live research is disabled until one is." }, "error");
 }

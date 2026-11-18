@@ -62,7 +62,11 @@ export function GenerateConsole({ query, force }: { query: string; force: boolea
     const tick = setInterval(() => setElapsed(Math.floor((Date.now() - t0) / 1000)), 500);
     const stop = () => clearInterval(tick);
 
+    // Set once a final event (done or error) arrives. A stream that ends without one was cut off,
+    // for example by the platform's function time limit.
+    let finished = false;
     const handle = (e: AgentEvent) => {
+      if (e.type === "done" || e.type === "error") finished = true;
       const t = (Date.now() - t0) / 1000;
       if (e.type === "stage") setStage((s) => ({ ...s, [e.stage]: e.status }));
       if (e.type === "source") setCounts((c) => ({ ...c, sources: c.sources + 1 }));
@@ -98,9 +102,17 @@ export function GenerateConsole({ query, force }: { query: string; force: boolea
           while ((nl = buf.indexOf("\n")) >= 0) {
             const raw = buf.slice(0, nl);
             buf = buf.slice(nl + 1);
-            if (raw.trim()) handle(JSON.parse(raw) as AgentEvent);
+            if (!raw.trim()) continue;
+            let event: AgentEvent;
+            try {
+              event = JSON.parse(raw) as AgentEvent;
+            } catch {
+              throw new Error("The server sent an unreadable response.");
+            }
+            handle(event);
           }
         }
+        if (!finished) throw new Error("The research run ended without a result. It may have exceeded the time limit.");
       } catch (e) {
         if (!ctrl.signal.aborted) {
           setError((e as Error).message);

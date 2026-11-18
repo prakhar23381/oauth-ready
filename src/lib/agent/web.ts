@@ -1,18 +1,19 @@
 import { lookup } from "node:dns/promises";
+import { PublicError } from "./events";
 import net from "node:net";
 
 export type SearchResult = { url: string; title: string; content: string; raw?: string; score: number };
 
 export async function tavilySearch(query: string, opts: { maxResults?: number; raw?: boolean } = {}): Promise<SearchResult[]> {
   const key = process.env.TAVILY_API_KEY;
-  if (!key) throw new Error("TAVILY_API_KEY is not set");
+  if (!key) throw new PublicError("Live research is not configured on this deployment (no search key).");
   const res = await fetch("https://api.tavily.com/search", {
     method: "POST",
     headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
     signal: AbortSignal.timeout(20_000),
     body: JSON.stringify({ query, max_results: opts.maxResults ?? 4, include_raw_content: opts.raw ?? false, search_depth: "basic" }),
   });
-  if (!res.ok) throw new Error(`Search failed (HTTP ${res.status})`);
+  if (!res.ok) throw new PublicError(`Search failed (HTTP ${res.status}). Web search is unavailable right now; try again shortly.`);
   const data = (await res.json()) as { results?: { url: string; title?: string; content?: string; raw_content?: string | null; score?: number }[] };
   return (data.results ?? []).map((r) => ({ url: r.url, title: r.title ?? r.url, content: r.content ?? "", raw: r.raw_content ?? undefined, score: r.score ?? 0 }));
 }
@@ -83,7 +84,7 @@ export function htmlToText(html: string): string {
     .replace(/<!--[\s\S]*?-->/g, " ")
     .replace(/<\/(p|div|li|h[1-6]|tr|section|article|br|table|ul|ol|pre|blockquote)>/gi, "\n")
     .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<[^>]+>/g, " ")
+    .replace(/<(?:[^>"']|"[^"]*"|'[^']*')*>/g, " ")
     .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
     .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
     .replace(/&([a-z]+);/gi, (m, n) => ENTITIES[n.toLowerCase()] ?? m)
@@ -104,7 +105,13 @@ const KEYWORDS =
   /\b(review|approv|verif|production|publish|submit|scope|redirect|callback|limit|quota|rate.?limit|users?\b|athletes?|testers?|business|company|partner|marketplace|app store|pricing|paid|free|tier|plan\b|fee|token|refresh|expir|client.?(id|secret)|oauth|pkce|sandbox|development mode|dev mode|test mode|security assessment|privacy policy|terms|screencast|video|demo|days?\b|weeks?\b|months?\b|hours?\b|machine learning|\bAI\b|train|reject|denied|support|contact|register|create an? app|developer (portal|console|account|program))/gi;
 
 export function excerpt(text: string, budgetChars: number): string {
-  const paras = text.split(/\n+/).map((p) => p.trim()).filter((p) => p.length > 30);
+  // Long lines (pages extracted without line breaks) are split at sentence ends so that every part
+  // of the page can compete for the budget, not just its first 1,100 characters.
+  const paras = text
+    .split(/\n+/)
+    .flatMap((p) => (p.length > 1000 ? p.split(/(?<=[.!?])\s+(?=[A-Z0-9“"(])/) : [p]))
+    .map((p) => p.trim())
+    .filter((p) => p.length > 30);
   const chunks: { i: number; text: string; score: number }[] = [];
   let buf = "";
   for (const p of paras) {

@@ -4,7 +4,7 @@ const research = vi.fn<(query: string, emit: (e: unknown) => void) => Promise<un
 const limit = vi.fn<(ip: string) => Promise<string | null>>(async () => null);
 const saved = vi.fn<(g: unknown) => Promise<void>>(async () => {});
 vi.mock("@/lib/agent/pipeline", async (orig) => ({ ...(await orig<typeof import("@/lib/agent/pipeline")>()), researchGuide: (q: string, emit: (e: unknown) => void) => research(q, emit) }));
-vi.mock("@/lib/store", () => ({ checkGenerateLimit: (ip: string) => limit(ip), getGeneratedGuide: async () => null, saveGeneratedGuide: (g: unknown) => saved(g) }));
+vi.mock("@/lib/store", () => ({ checkGenerateLimit: (ip: string) => limit(ip), getGeneratedGuide: async () => null, saveGeneratedGuide: (g: unknown) => saved(g), hasDurableStore: () => true, log: () => {} }));
 
 const post = async (body: string, headers: Record<string, string> = { "content-type": "application/json" }) => {
   const { POST } = await import("@/app/api/generate/route");
@@ -89,5 +89,27 @@ describe("GET /api/guides/[slug]", () => {
   });
   it.each(["nope", "../../package", "..%2F..%2Fpackage", "gmail\u0000", "a".repeat(5000)])("returns 404 for %s", async (slug) => {
     expect((await get(slug)).status).toBe(404);
+  });
+});
+
+describe("POST /api/generate cross-site protection (F12)", () => {
+  it("rejects non-JSON content types with 415, so cross-site 'simple requests' cannot start runs", async () => {
+    for (const ct of ["text/plain;charset=UTF-8", "application/x-www-form-urlencoded", "multipart/form-data; boundary=x"]) {
+      expect((await post('{"query":"Strava"}', { "content-type": ct })).status).toBe(415);
+    }
+    expect(research).not.toHaveBeenCalled();
+  });
+  it("rejects requests from another origin or a cross-site context with 403", async () => {
+    expect((await post('{"query":"Strava"}', { "content-type": "application/json", origin: "https://evil.example", host: "localhost" })).status).toBe(403);
+    expect((await post('{"query":"Strava"}', { "content-type": "application/json", "sec-fetch-site": "cross-site" })).status).toBe(403);
+    expect((await post('{"query":"Strava"}', { "content-type": "application/json", origin: "null" })).status).toBe(403);
+    expect(research).not.toHaveBeenCalled();
+  });
+  it("accepts same-origin browser requests and non-browser clients", async () => {
+    const variants: Record<string, string>[] = [{ origin: "http://localhost", host: "localhost", "sec-fetch-site": "same-origin" }, {}];
+    for (const h of variants) {
+      const ev = await events(await post('{"query":"Slack"}', { "content-type": "application/json", ...h }));
+      expect(ev.at(-1)).toMatchObject({ type: "done", slug: "slack" });
+    }
   });
 });

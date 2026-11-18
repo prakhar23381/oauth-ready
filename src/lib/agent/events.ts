@@ -12,3 +12,6 @@ export type AgentEvent =
   | { type: "error"; message: string };
 
 export type Emit = (e: AgentEvent) => void;
+
+/** An error whose message is written for end users. Any other error is shown as a generic failure and logged. */
+export class PublicError extends Error {}
