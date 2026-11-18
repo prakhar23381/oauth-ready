@@ -5,7 +5,7 @@ import { researchGuide, slugify } from "@/lib/agent/pipeline";
 import { PublicError, type AgentEvent } from "@/lib/agent/events";
 import { log } from "@/lib/store";
 import { z } from "zod";
-import { clientIp, crossSiteReason } from "@/lib/request";
+import { clientIp, crossSiteReason, ipDiagnostics } from "@/lib/request";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
           log("generate.limited", { runId, query });
           return emit({ type: "error", message: refused });
         }
-        log("generate.start", { runId, query });
+        log("generate.start", { runId, query, ip: ipDiagnostics(req) });
         const { guide } = await researchGuide(query, emit);
         if (await getLibraryGuide(guide.slug)) return emit({ type: "done", slug: guide.slug, cached: true, ms: Date.now() - started });
         await saveGeneratedGuide(guide);
