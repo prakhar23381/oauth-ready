@@ -9,36 +9,50 @@
   - Strictly local: production was not contacted.
   - Tool installs allowed: dev dependencies on this branch, scanners outside the repo.
 
-## 0. Status after fixes (branch `fix/release-readiness-2026-11-18`, commit `4143bc9`)
+## 0. Status after fixes (branch `fix/release-readiness-2026-11-18`, commit `256be23`)
 
-**Verdict after fixes: GO-WITH-CONDITIONS.**
+**Verdict after fixes: GO-WITH-CONDITIONS.** All 22 findings are fixed, except F20, which was a measurement artefact and needed no code change. The only remaining conditions are checks that can only be done on Vercel.
 
-All 84 tests pass (79 original plus 5 new regression tests), identical across 3 runs and a shuffled run. `tsc --noEmit` and `eslint --max-warnings=0` are clean. Each original reproduction was re-run against a fresh clone of the fix branch, set up exactly as the README says, built, and served with `next start`.
+**Checks on the final build:**
+- **Tests:** 88 pass (79 from the audit plus 9 regression tests), stable over repeated and shuffled runs.
+- **Type check and lint:** `tsc --noEmit` and `eslint --max-warnings=0` are clean.
+- **Production dependency audit:** `pnpm audit --prod` reports no known vulnerabilities (was 5 high and 3 moderate).
+- **axe:** 0 violations on 6 pages in both themes (was 99).
+- **Lighthouse:** accessibility 100. Performance 95 on home and 94 on a guide page, over 3 runs each.
+
+Each original reproduction was re-run against a fresh clone of the branch, set up exactly as the README says, built, and served with `next start`.
 
 | ID | Fix | Re-run evidence |
 |---|---|---|
-| F1 | Strict integer parsing (`envInt`); `.env.example` lines commented out | README flow now returns the "no model API key" message instead of "Limit reached: 0" |
+| F1 | Strict integer parsing (`envInt`); `.env.example` lines commented out | README flow returns "no model API key" instead of "Limit reached: 0" |
 | F2 | Body validated with Zod | `null`, `42`, `["a"]` and `{"$ne":""}` all return 400 |
-| F3, F14 | Two-layer limiter: per-instance memory first, then Redis or Blob. Refused requests don't touch the daily counter, and store errors fall back to the memory layer (logged). | Store tests pass |
-| F4 | Same memory layer | **Per instance only**: concurrent requests on different serverless instances can still race on Blob |
+| F3, F14 | Two-layer limiter: per-instance memory, then Redis or Blob. Refused requests never count toward the daily budget, and store errors fall back to the memory layer (logged). | Store tests pass |
+| F4 | Blob counter per day, updated with compare-and-swap (`ifMatch` ETag, retried on conflict) | Two module instances sharing a fake store with ETag semantics: exactly 6 of 12 concurrent requests allowed, stable over 5 runs. Planting a bug that removes `ifMatch` fails the test. |
 | F5 | Hashed slug for names without Latin letters | `微信` and `카카오` get different slugs |
-| F6 | `PublicError` for user-facing messages; everything else becomes generic, with a reference ID that appears in the logs | API test passes |
+| F6 | `PublicError` for user-facing messages; everything else is generic, with a reference ID that appears in the logs | API test passes |
 | F7, F8 | Quote-aware tag stripping; long lines split at sentence ends | Web tests pass |
-| F9 | Slug allow-list `^[a-z0-9](…)$` in loaders and the store | Both traversal URLs return 404 |
-| F10 | A stream that ends without `done` or `error` becomes an error; unreadable lines get a plain message | UI shows "Research stopped" with "Try again" in all four failure modes |
-| F12 | JSON content type required (415); cross-origin `Origin` or `Sec-Fetch-Site` rejected (403) | Evil-origin requests get 415 or 403; same-origin browser flow still 200 |
-| F15 | Live research refused on Vercel when no durable store is configured, with an error log at startup | Store test passes |
-| F16 | JSON log lines: `generate.start`, `done`, `failed`, `limited`, `rejected`, `limiter.store_error`, `store.ephemeral` | Seen in server output |
+| F9 | Slug allow-list in loaders and the store | Traversal URLs return 404 |
+| F10 | A stream that ends without `done` or `error` becomes an error; unreadable lines get a plain message | All four failure modes show "Research stopped" with "Try again" |
+| F11 | On Vercel, the per-IP key comes from `x-real-ip` / `x-vercel-forwarded-for` (set by the platform) | Unit tests. **Header behaviour on Vercel not yet observed.** |
+| F12 | JSON content type required (415); cross-origin `Origin` or `Sec-Fetch-Site` rejected (403) | Evil-origin requests get 415 or 403; same-origin browser flow returns 200 |
+| F13 | The SSRF check moved into the socket's DNS lookup (undici `Agent` passed to `fetch`), so the address that is checked is the address that is connected to | A local server that `fetch` reaches without the agent is blocked with it. Public pages still load (example.com, Google docs). |
+| F15 | Live research refused on Vercel without a durable store; error logged at startup | Store test passes |
+| F16 | JSON log lines per run, refusal and store error; README lists them | Seen in server output |
+| F17 | Semantic and text tokens adjusted in lightness only, documented in DESIGN.md §8c | axe colour-contrast: 85 violations down to 0 |
+| F18, F19 | No interactive controls inside `<summary>` or buttons; labelled table header | axe: 0 violations |
+| F20 | No code change. Re-measured over 3 runs: home TBT 20–30ms, performance 95. The original 1,210ms was a single run against a freshly started server. | Lighthouse |
+| F21 | `/api/health` (configuration as booleans, no external calls), CI workflow (typecheck, lint, validate, test, prod audit, build), operations section in the README | `/api/health` returns 200 `degraded` with no keys |
+| F22 | Removed 9 unused UI files and 3 unused dependencies; `shadcn` moved to dev; `postcss` and nested `zod` overridden to patched versions | Production audit clean; build passes |
 
-**Conditions before promoting to production:**
-1. **Deploy to a Vercel preview first** and confirm the browser flow there. The origin check compares `Origin` with `x-forwarded-host` / `host`; this was verified locally only.
-2. **Still open:**
-   - F11: per-IP key from `X-Forwarded-For`. Verify on Vercel.
-   - F13: DNS-rebinding window in the SSRF guard.
-   - F17–F19: accessibility.
-   - F20–F22: performance and hygiene.
-   - F4 across instances.
-3. **Rehearse `vercel rollback` once on a preview.** It is still untested.
+**Conditions before promoting to production.** These can only be checked on Vercel; all are untested so far.
+1. **Deploy to a preview and run the browser flow there:**
+   - The origin check (F12) compares `Origin` with `x-forwarded-host` / `host`.
+   - The client IP (F11) reads Vercel's platform headers.
+   - The undici dispatcher (F13) runs on Vercel's Node runtime.
+2. **Run one live research on the preview with Blob connected,** to confirm the compare-and-swap counter (F4) against the real Blob API. Its "already exists" handling was written from the SDK types and tested only against a mock. If the real error differs, the limiter logs `limiter.store_error` and falls back to the per-instance limit; it does not fail open.
+3. **Rehearse `vercel rollback` once on a preview.**
+
+Not covered by any fix: live model output variance, and the free-tier quota itself.
 
 ---
 
