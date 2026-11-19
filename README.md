@@ -85,7 +85,7 @@ Generated guides are stored in `.data/` locally. On Vercel they go to a private 
 
 ## Operating it
 
-**Deploy.** CI (`.github/workflows/ci.yml`) runs the type check, lint, guide validation, tests, the production dependency audit and a build on every push and pull request. Deploy to a preview first with `vercel deploy`. Check the preview, then promote it with `vercel deploy --prod` or from the Vercel dashboard.
+**Deploy.** CI (`.github/workflows/ci.yml`) runs the type check, lint, guide validation, tests, the production dependency audit and a build on every push and pull request. The Vercel project is connected to GitHub: every branch push gets a preview deployment, and every push to `main` deploys production. Check a branch's preview before merging.
 
 **Check health.** `GET /api/health` returns:
 - `status`: `ok`, `degraded` (library works, live research does not), or `down`.
